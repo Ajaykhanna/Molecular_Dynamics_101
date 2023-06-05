@@ -1,0 +1,23 @@
+# File for Generating Amber Parameters Using tleap
+source leaprc.water.tip3p
+source leaprc.gaff
+
+# Loading Molecules Geometry & Modified FF parameters
+ligand = loadmol2 ibrutinib.mol2
+loadamberparams ibrutinib.frcmod
+
+# Checking if All FF parameters are Okay
+check ligand
+
+# Making a Copy of Original Molecule
+ligand_water=copy ligand
+
+# Solvating the Box with Water
+solvatebox ligand_water TIP3PBOX 20.0
+
+# Saving Amber Parameters & Topology Files
+saveamberparm ligand_water ligand_water.prmtop ligand_water.inpcrd
+savepdb ligand_water ligand_water.pdb
+
+# Done
+quit
