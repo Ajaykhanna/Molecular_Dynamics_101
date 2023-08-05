@@ -1,0 +1,21 @@
+Initial min of our structure QMMM
+&cntrl
+ imin=1, maxcyc=2000, ncyc=1000,
+ cut=8.0, ntb=1, ntc=2, ntf=2,
+ ifqnt=1  ! Turn-on QMMM
+/
+&qmmm
+ qmmask=':1'    ! QM Resid
+ qmcharge=0,    ! QM Charge
+ qmshake=0,     ! SHAKE for QM True: 1 or False: 0
+ qm_ewald=0, qm_pme=1,
+ qm_theory='EXTERN',  !Calling External Program, for this case Gaussian
+ spin=1,
+/
+&gau
+ mem = '25GB',  ! Memory
+ method = 'B3LYP',  ! DFT Functional 
+ basis = '6-31G(d)',  ! BS
+ num_threads = 12,  !NProc  
+ use_template = 0,  ! Use Template: True:1 Flase: 0
+/
