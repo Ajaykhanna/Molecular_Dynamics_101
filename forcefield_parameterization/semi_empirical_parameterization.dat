@@ -1,0 +1,26 @@
+## The following example shows how to obtained forcefield parameter of Benzene with charges obtained using semi-empirical method "AM1" and bonded and non-bonded parameters from GAFF2 forcefield
+You will need the following command line tools:
+  1. Obabel for convert "SMILES" to PDBs
+  2. pbd4amber from AmberTools to convert the PDB into GAFF2 compitable PDB
+  3. Antechamber to fit AM1 charges and convert the PDB file to mol2 file
+  4. parmchk2 for obtained .frcmod file
+
+Step #1: Use the following obabel command to convert benzene SMILEs to PBD
+  '''
+  obabel -:"c1ccccc1" -O benzene.pdb
+  '''
+Step #2: Use the following pbd4amber command to conver the benzene.pdb file to GAFF2 compitable file
+  '''
+  pdb4amber -i benzene.pdb -o benzene_amber.pdb
+  '''
+Step #3: Now use Antechamber to conver the processed pdb file to a mol2 file with charges obatained using the semi-empirical quantum mechanics methods "AM1"
+  '''
+  antechamber -i benzene_amber.pdb -fi pdb -o benzene_amber.mol2 -fo mol2 -c bcc -s 2 -at gaff -nc 0 -pl 10
+  '''
+Wait till the process finishes
+Step #4: Use Parmchk2 to obtaine the .frcmod file
+  '''
+  parmchk2 -i benzene_amber.mol2 -f mol2 -o benzene_amber.frcmod -s gaff2
+  '''
+
+That's all, make sure to read the .frcmod file for any "WARNING", "ATTENTION" or "MISSING" parameters. 
