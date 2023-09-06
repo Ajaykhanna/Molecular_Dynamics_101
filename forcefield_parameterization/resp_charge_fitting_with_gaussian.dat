@@ -1,0 +1,31 @@
+# This method shows an example of how to parameterize the GAFF2 forcefield using the ground state RESP charges obtained using Merz and Kollman Scheme with HF/6-31G* as the level of theory. 
+# Make sure the starting structure is optimized to a local minimum and has no negative frequencies
+# Once the log file is obtained, we will be using "Antechamber" to perform fitting of the resp charges onto the GAFF2 parameters
+
+Step #1. Optimize the ground state geometry of your molecule using a level of theory of your interest
+Step #2. Use the following Gaussian Job parameters to obtain the RESP charge on the optimized geometries
+'''
+%chk=molecule.chk
+# HF/6-31G* SPop=MK iop(6/33=2)
+
+# RESP Charge Calculations
+
+# Charge Multiplicity
+# Molecule Coordinates
+
+  
+'''
+
+Step #3. Use the following antechamber command to convert the log file into a .mol2 file with charges fitted to RESP charges
+'''
+antechamber -i molecule.log -fi gout -o molecule.mol2 -fo mol2 -c resp -nc 0 -m 1 -rn MOL -at gaff2
+'''
+Make sure to perform a scan to check the proper fitting of the charges.
+
+# Step #4: Use Parmchk2 to get .frcmod parameters
+'''
+parmchk2 -i molecule.mol2 -f mol2 -o molecule.frcmod
+'''
+
+That's all you need for RESP parameterization; you can use Amber's Parmfit2 to perform the same parameterization.
+  
