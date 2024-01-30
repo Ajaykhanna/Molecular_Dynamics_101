@@ -14,6 +14,8 @@ Welcome to the Molecular Dynamics 101 repository! This repository contains lesso
 
 5. ⏲️ 'thermostat': This folder includes a Python script demonstrating the working of Langevin dynamics using Argon atoms. [Link](./thermostat)
 
+6. 🧪🔬 'amber_md': Running Amber MD simulations using the AmberTools package: Input scripts on running either simple molecular dynamics or a full-on production level molecular dynamics simulations. [Link](./amber_md)
+
 Feel free to explore each subfolder for detailed explanations, code examples, and tutorials!
 
-6. 🧪🔬 'amber_md': Running Amber MD simulations using the AmberTools package: Input scripts on running either simple molecular dynamics or a full-on production level molecular dynamics simulations. [Link](./amber_md)
+
