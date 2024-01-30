@@ -1,0 +1,22 @@
+Equilibration at 300K with weak coupling for 50 ps at dt=0.5fs
+ &cntrl
+  imin     = 0,      ! do MD (no minimization)
+  irest    = 1,      ! trajectory restart
+  ntx      = 5,      ! coordinates and velocities are read in
+  dt       = 0.0005  ! 0.5fs time step
+  cut      = 999.0,  ! non-bonded cutoff
+  ntb      = 1,      ! periodic boundary conditions
+  ntt      = 3,      ! use Langevine thermostat
+  tautp    = 1.0,    ! time constant for heat coupling 1.0ps
+  tempi    = 300.0,  ! Initial Temperature
+  temp0    = 300.0,  ! temp = 300K
+  gamma_ln = 5.0,    ! Collision Frequency
+  ntpr     = 500,    ! logfile print frequency
+  ntwx     = 500,    ! coordinate writing frequency
+  ntwr     = 1000,   ! restart file writing frequency
+  nstlim   = 100000, ! number of steps
+  nscm     = 2000,   ! COM motion removal frequency
+  jfastw   = 4,      ! do not use routines for fast triangulated water
+  ioutfm   = 1,      ! NetCDF MDCRD.
+  ntr = 1, restraint_wt=1.0, restraintmask=':1', ! Turning-On Restrain on N
+ /

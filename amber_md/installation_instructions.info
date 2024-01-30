@@ -1,0 +1,35 @@
+## Instruction To Install Amber18 with Amber19Tools on Windows Subsystem Linux/Virtual Machine/New Linux Cluster
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Written By: Ajay Khanna || Dr. Isborn’s Lab || UC Merced || June.16.2020
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Step 1. Make sure you have the original source codes for both Amber18 and Amber19 Tools. Making a precompiled Amber work on a different OS or
+clusters can be challenging and is not covered in this  instructions. Also, try not to install this as a root user.
+Step 2. a) “tar xvfj AmberTools19.tar.bz2” # This will extract Ambertools19 to amber18 folder.
+Step 2. b) “tar xvfj Amber18.tar.bz2”  # This will extract Amber18 to amber18 folder.
+Step 3. “export AMBERHOME=/home/myname/amber18” # (for bash, zsh, ksh, etc.) or
+		“setenv AMBERHOME /home/myname/amber18” # (for csh, tcsh).
+Step 4. “sudo apt-get -y install bc csh flex gfortran g++ xorg-dev zlib1g-dev libbz2-dev patch bison”#
+		  This will install required Linux dependencies.
+Step 5. “cd $AMBERHOME  ” # Take you to the amber18 folder, make sure to double check in your terminal.
+
+    “./configure gnu  ” # This step is crucial and make sure you say “yes” to the prompt. This step will
+
+    first check for the patches/updates for Amber and will try to apply them and also since Amber18
+
+    python2.x interface it will also first find the version of python already installed and then install
+
+    ython libraries accordingly. If you wanna take the full advantage of Amber18, try not to have any
+
+    conda/python installation beforehand, Amber18 will create a module of miniconda for you that
+
+    activate and then use Amber python2 dependent tools. If you get some error in this step read through the errors and see what it is saying.
+
+Step 6. “source /home/myname/amber18/amber.sh  ” # Sourcing the Amber Installation script and make sure to add this to your ~/.bashrc file if you wanna have Amber available every time you				login.
+Step 7. “make install” # This step will start the Installation process and be patient with this as this will take at least 30 mins depending upon the OS and memory. Also, during the installation process you will get some warning being printed on the screen, don’t worry about it, it’s common.
+Step 8. Hopefully at this point you should have received something like this “Installation of Amber18 (serial)  is complete at Tue Jun 16 11:52:51 PDT 2020.” and if not read through the errors again and google it .
+Step 9. “make test” # This will perform some test calculation to check whether everything installed is working properly.
+Step 10. “It’s done” Congratulations !!!. If you like this follow Amber on Twitter.

@@ -1,0 +1,9 @@
+molecular dynamics run
+&cntrl
+imin=0, irest=1, ntx=5, (restart MD)
+ntt=3, temp0=300.0, gamma_ln=5.0, (temperature control)
+ntp=1, taup=2.0, (pressure control)
+ntb=2, ntc=2, ntf=2, (SHAKE, periodic bc.)
+nstlim=500000, (run for 0.5 nsec)
+ntwx=1000, ntpr=200, (output frequency)
+/
