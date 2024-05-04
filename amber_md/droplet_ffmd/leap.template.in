@@ -1,0 +1,30 @@
+source leaprc.gaff2
+source leaprc.water.tip3p
+
+solute = loadmol2 phenoxide.mol2
+loadamberparams phenoxide.frcmod
+
+
+check solute
+
+# Create a Copy of Solutes
+# solute_solvent_box = copy solute
+solute_solvent_drop = copy solute
+
+# Solvating the Box
+# solvatebox solute_solvent_box TIP3PBOX 20.0
+
+# Solvating the drop
+solvateCap solute_solvent_drop TIP3PBOX solute_solvent_drop.1 40.0
+
+# Saving Box prmtop & inpcrd
+# saveamberparm solute_solvent_box solute_solvent_box.prmtop solute_solvent_box.inpcrd
+# savepdb solute_solvent_box solute_solvent_box.pdb
+
+
+# Saving Drop prmtop & inpcrd
+saveamberparm solute_solvent_drop solute_solvent_drop.prmtop solute_solvent_drop.inpcrd
+savepdb solute_solvent_drop solute_solvent_drop.pdb
+
+quit
+

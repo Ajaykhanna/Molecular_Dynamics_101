@@ -1,0 +1,13 @@
+
+System Minimization
+&cntrl
+imin = 1,
+irest = 0,
+ntmin = 1,
+ntpr = 100,
+ntwx = 100,
+maxcyc = 50000,
+ntb=1,
+drms=1.0E-4,
+cut = 10.0,
+/
