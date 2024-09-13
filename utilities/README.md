@@ -7,7 +7,9 @@ This script processes a molecular dynamics trajectory file containing multiple d
 How to Run the Script:
 
 ```python
-python extract_qm_mm_snapshots.py --input trajectory.xyz --solv_charge charges.txt --qm_radius 5.0 --mm_radius 27.0 --nDyes 2 --dye_atoms 17 42 --total_nDyes_atoms 59 --nAtoms_solvent 10 --total_frames 2 --total_atoms 4489
+python extract_qm_mm_snapshots.py --input trajectory.xyz --solv_charge solv_charges.txt \
+    --qm_radius 5.0 --mm_radius 27.0 --nDyes 2 --dye_atoms 17 42 --total_nDyes_atoms 59 \
+    --nAtoms_solvent 10 --total_frames 2 --total_atoms 4489
 ```
 
 ### Prerequisites
