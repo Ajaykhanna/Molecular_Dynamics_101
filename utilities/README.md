@@ -7,7 +7,9 @@ This script processes a molecular dynamics trajectory file containing multiple d
 How to Run the Script:
 
 ```python
-python extract_qm_mm_snapshots.py --input trajectory.xyz --solv_charge charges.txt --qm_radius 5.0 --mm_radius 27.0 --nDyes 2 --dye_atoms 17 42 --total_nDyes_atoms 59 --nAtoms_solvent 10 --total_frames 2 --total_atoms 4489
+python extract_qm_mm_snapshots.py --input trajectory.xyz --solv_charge solv_charges.txt \
+    --qm_radius 5.0 --mm_radius 27.0 --nDyes 2 --dye_atoms 17 42 --total_nDyes_atoms 59 \
+    --nAtoms_solvent 10 --total_frames 2 --total_atoms 4489
 ```
 
 ### Prerequisites
@@ -22,11 +24,15 @@ python extract_qm_mm_snapshots.py --input trajectory.xyz --solv_charge charges.t
 ```python
 --input (-i): Path to the trajectory XYZ file.
 --solv_charge (-c): Path to the solvent charge file.
---qm_radius (-r_qm): QM radius in Å. Solvent within this radius from any dye atom are included in the QM region (default: 5.0 Å).
---mm_radius (-r_mm): MM radius in angstroms (not directly used in the script but can be adjusted as needed).
+--qm_radius (-r_qm): QM radius in Å. Solvent within this radius from any dye atom are \
+  included in the QM region (default: 5.0 Å).
+--mm_radius (-r_mm): MM radius in angstroms (not directly used \
+  in the script but can be adjusted as needed).
 --nDyes (-n_dyes): Number of dyes in the system.
---dye_atoms (-d_atoms): List of atom counts for each dye. For example, --dye_atoms 17 42 for two dyes with 17 and 42 atoms respectively.
---total_nDyes_atoms (-tot_d_atoms): Total number of atoms in all dyes (sum of atom counts in --dye_atoms).
+--dye_atoms (-d_atoms): List of atom counts for each dye. \
+  For example, --dye_atoms 17 42 for two dyes with 17 and 42 atoms respectively.
+--total_nDyes_atoms (-tot_d_atoms): Total number of atoms in all dyes \
+  (sum of atom counts in --dye_atoms).
 --nAtoms_solvent (-n_solvent_atoms): Number of atoms per solvent molecule.
 --total_frames (-f): Total number of frames (snapshots) in the trajectory.
 --total_atoms (-a): Total number of atoms per frame in the trajectory file.
