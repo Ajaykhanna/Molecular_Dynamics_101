@@ -1,7 +1,7 @@
-%chk=gaussian_vee_5.0ang.chk
-#p tda(nstates=6, root=1) cam-b3lyp/6-31g* nosymm charge
+%chk=gaussian_charge_5.0angs.chk
+#p pop=(regular, MK) HF/6-31g* nosymm charge iop(6/33=2) iop(6/42=6) iop(6/50=1) SCF=tight test
 
-Excited State Energy Calculations
+Ground State Charge Calculations
 
 0 1
 N	20.961456	18.605639	24.679466
