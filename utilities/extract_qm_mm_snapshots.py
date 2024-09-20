@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # ------------------------------------------------------------------------
-# Python Script to Generate TeraChem Ground State Optimization
+# Python Script to Generate TeraChem And Gaussian Input Files
 # Input Files in Explicit Solvent Environment
 # For Multiple Dyes (>=2) in a sigle solvent
 # By: Ajay Khanna | Sep.13.2024 [akhanna2@ucmerced.edu] | Isborn Lab
@@ -9,8 +9,12 @@
 
 import re
 import os
-import numpy as np
 import argparse
+import numpy as np
+from generate_gausFiles import (
+    generate_charge_files,
+    generate_vertical_excitation_energy_file,
+)
 
 
 # Function to parse command line arguments
@@ -181,6 +185,10 @@ def process_snapshots(args):
             f"gaussian_vee_{args.qm_radius}ang.com",
         )
 
+        gaussian_charge_filename = os.path.join(
+            frame_dir, f"gaussian_charge_{args.qm_radius}angs.com"
+        )
+
         dye_coords_list = []
         dye_atom_labels_list = []
         solvent_atom_labels = []
@@ -274,7 +282,7 @@ def process_snapshots(args):
         prepend_line(qm_filename, str(total_qm_atoms))
 
         # Generate Gaussian input file
-        generate_gaussian_input(
+        generate_vertical_excitation_energy_file(
             gaussian_input_filename,
             dye_atom_labels_list,
             dye_coords_list,
@@ -286,6 +294,16 @@ def process_snapshots(args):
             basis="6-31g*",
             nstates=6,
             root=1,
+        )
+
+        generate_charge_files(
+            gaussian_charge_filename,
+            dye_atom_labels_list,
+            dye_coords_list,
+            solvent_molecules,
+            qm_solvent_indices,
+            mm_solvent_indices,
+            solvent_charge_list,
         )
 
     print("------> Done!! <------")
@@ -338,74 +356,6 @@ gpus          all
 safemode      no
 end
 """
-
-
-def generate_gaussian_input(
-    filename: str,
-    dye_atom_labels_list: list[list[str]],
-    dye_coords_list: list[np.ndarray],
-    solvent_molecules: list[tuple[list[str], np.ndarray]],
-    qm_solvent_indices: list,
-    mm_solvent_indices: list[int],
-    solvent_charge_list: np.ndarray,
-    net_charge: int = 0,
-    spin_mult: int = 1,
-    dft_func: str = "cam-b3lyp",
-    basis: str = "6-31g*",
-    nstates: int = 6,
-    root: int = 1,
-):
-    """
-    Generates the Gaussian input file for a given frame.
-
-    Args:
-        filename (str): Path to the Gaussian input file to be created.
-        dye_atom_labels_list (list): List of lists containing atom labels for each dye.
-        dye_coords_list (list): List of numpy arrays containing coordinates for each dye.
-        solvent_molecules (list): List of tuples containing solvent atom labels and coordinates.
-        qm_solvent_indices (list): List of indices of solvent molecules in the QM region.
-        mm_solvent_indices (list): List of indices of solvent molecules in the MM region.
-        solvent_charge_list (np.ndarray): Array of solvent charge values.
-        dft_func (str): DFT functional to use.
-        basis (str): Basis set to use.
-    """
-    with open(filename, "w") as gauss_file:
-        # Write checkpoint filename and job keywords
-        chk_filename = os.path.splitext(os.path.basename(filename))[0] + ".chk"
-        gauss_file.write(f"%chk={chk_filename}\n")
-        gauss_file.write(
-            f"#p tda(nstates={nstates}, root={root}) {dft_func}/{basis} nosymm charge\n\n"
-        )
-        gauss_file.write("Vertical Excitation Energy Calculations\n\n")
-        gauss_file.write(f"{net_charge} {spin_mult}\n")
-
-        # Write QM coordinates
-        for dye_labels, dye_coords in zip(dye_atom_labels_list, dye_coords_list):
-            for label, coord in zip(dye_labels, dye_coords):
-                gauss_file.write(
-                    f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
-                )
-
-        for mol_idx in qm_solvent_indices:
-            mol_labels, mol_coords = solvent_molecules[mol_idx]
-            for label, coord in zip(mol_labels, mol_coords):
-                gauss_file.write(
-                    f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
-                )
-
-        gauss_file.write("\n")
-
-        # Write MM coordinates with charges (X Y Z charge)
-        for mol_idx in mm_solvent_indices:
-            mol_labels, mol_coords = solvent_molecules[mol_idx]
-            for atom_idx_in_mol, coord in enumerate(mol_coords):
-                # Use modulo in case the charge list is shorter than the number of atoms per solvent molecule
-                charge = solvent_charge_list[atom_idx_in_mol % len(solvent_charge_list)]
-                gauss_file.write(
-                    f"{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\t{charge:.6f}\n"
-                )
-
-        gauss_file.write("\n")
 
 
 if __name__ == "__main__":
