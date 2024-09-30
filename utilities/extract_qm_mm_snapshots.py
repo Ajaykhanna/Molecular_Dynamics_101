@@ -14,6 +14,7 @@ import numpy as np
 from generate_gausFiles import (
     generate_charge_files,
     generate_vertical_excitation_energy_file,
+    generate_transition_charge_files,
 )
 
 
@@ -43,10 +44,20 @@ def parse_args():
         help="Solvent point charge file (cols)",
     )
     parser.add_argument(
-        "--qm_radius", "-r_qm", type=float, default=5, help="QM Radius (default=5.0A)"
+        "--qm_radius",
+        "-r_qm",
+        type=float,
+        default=5.0,
+        required=False,
+        help="QM Radius (default=5.0A)",
     )
     parser.add_argument(
-        "--mm_radius", "-r_mm", type=float, default=27, help="MM Radius (default=27.0A)"
+        "--mm_radius",
+        "-r_mm",
+        type=float,
+        default=27.0,
+        required=False,
+        help="MM Radius (default=27.0A)",
     )
     parser.add_argument(
         "--nDyes", "-n_dyes", type=int, required=True, help="Number of Dyes"
@@ -189,6 +200,11 @@ def process_snapshots(args):
             frame_dir, f"gaussian_charge_{args.qm_radius}angs.com"
         )
 
+        gaussian_transition_charge_filename = os.path.join(
+            frame_dir,
+            f"gaussian_transition_charge_{args.qm_radius}angs.com",
+        )
+
         dye_coords_list = []
         dye_atom_labels_list = []
         solvent_atom_labels = []
@@ -306,8 +322,20 @@ def process_snapshots(args):
             solvent_charge_list,
         )
 
-    print("------> Done!! <------")
-    print("------> Buy Developer a Beer!! <------")
+        generate_transition_charge_files(
+            gaussian_transition_charge_filename,
+            dye_atom_labels_list,
+            dye_coords_list,
+            solvent_molecules,
+            qm_solvent_indices,
+            mm_solvent_indices,
+            solvent_charge_list,
+            theory="cam-b3lyp",
+        )
+
+        print(f"---> Snapshot {frame_dir} generated")
+
+    print("------> Done or Failed!, Still Buy Developer a Beer!! <------")
 
 
 def terachem_params(point_charge_file, coordinate_file):

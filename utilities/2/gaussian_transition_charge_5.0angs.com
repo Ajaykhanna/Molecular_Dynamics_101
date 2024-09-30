@@ -1,7 +1,8 @@
-%chk=gaussian_vee_5.0ang.chk
-#p tda(nstates=6, root=1) cam-b3lyp/6-31g* nosymm charge EmpiricalDispersion=GD3
+%chk=gaussian_transition_charge_5.0angs.chk
+#p tda(nstates=6, root=1) pop=SaveNTO density(transition=1)
+cam-b3lyp/6-31g* nosymm charge EmpiricalDispersion=GD3
 
-Vertical Excitaion Energy Calculations
+Transition State Charge Calculations
 
 0 1
 N	20.916695	18.640013	24.730598

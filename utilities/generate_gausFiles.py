@@ -2,6 +2,32 @@ import re
 import os
 import numpy as np
 
+
+def dummy_gaussian_input_file(filename: str):
+    """
+    Generates a dummy Gaussian input file for testing purposes.
+    """
+
+    with open(filename, "w") as f:
+        f.write(
+            """
+%chk=dummy.chk
+#p HF/6-31g* nosymm
+                
+Dummy Gaussian Input File
+                
+0 1
+C 0.000000 0.000000 0.000000
+H 0.000000 0.000000 1.089000
+H 1.026719 0.000000 -0.363000
+H -0.513360 -0.889165 -0.363000
+H -0.513360 0.889165 -0.36300
+                
+
+"""
+        )
+
+
 def remove_integers_from_symbol(atom_line: str) -> str:
     """
     Removes any integers from the symbol part of an atom line.
@@ -13,6 +39,7 @@ def remove_integers_from_symbol(atom_line: str) -> str:
     """
     symbol = re.sub(r"\d+", "", atom_line.split()[0])
     return symbol
+
 
 def write_qm_coordinates(
     gauss_file,
@@ -46,6 +73,7 @@ def write_qm_coordinates(
                 f"{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
             )
 
+
 def write_mm_coordinates(
     gauss_file,
     solvent_molecules: list[tuple[list[str], np.ndarray]],
@@ -68,6 +96,7 @@ def write_mm_coordinates(
             gauss_file.write(
                 f"{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\t{charge:.6f}\n"
             )
+
 
 def generate_gaussian_input_file(
     filename: str,
@@ -134,6 +163,7 @@ def generate_gaussian_input_file(
             gauss_file.write(extra_sections)
             gauss_file.write("\n")
 
+
 def generate_ground_state_energy_files(
     filename: str,
     dye_atom_labels_list: list[list[str]],
@@ -152,7 +182,7 @@ def generate_ground_state_energy_files(
     """
     chk_filename = os.path.splitext(os.path.basename(filename))[0] + ".chk"
     header_options = f"%chk={chk_filename}"
-    route_section = f"{dft_func}/{basis} nosymm charge"
+    route_section = f"{dft_func}/{basis} nosymm charge EmpiricalDispersion=GD3"
     title = "Ground State Energy Calculations"
 
     generate_gaussian_input_file(
@@ -170,6 +200,7 @@ def generate_ground_state_energy_files(
         header_options,
     )
 
+
 def generate_ground_state_optimization_files(
     filename: str,
     dye_atom_labels_list: list[list[str]],
@@ -182,14 +213,19 @@ def generate_ground_state_optimization_files(
     spin_mult: int = 1,
     dft_func: str = "cam-b3lyp",
     basis: str = "6-31g*",
+    opt_freq: bool = False,
 ):
     """
     Generates the Gaussian input file for ground state optimization calculations.
     """
     chk_filename = os.path.splitext(os.path.basename(filename))[0] + ".chk"
     header_options = f"%chk={chk_filename}"
-    route_section = f"opt {dft_func}/{basis} nosymm charge"
-    title = "Ground State Optimization Calculations"
+    if opt_freq:
+        route_section = f"opt freq {dft_func}/{basis} nosymm charge EmpiricalDispersion=GD3"
+        title = "Ground State Optimization and Frequency Calculations"
+    else:
+        route_section = f"opt {dft_func}/{basis} nosymm charge EmpiricalDispersion=GD3"
+        title = "Ground State Optimization Calculations"
 
     generate_gaussian_input_file(
         filename,
@@ -205,6 +241,7 @@ def generate_ground_state_optimization_files(
         title,
         header_options,
     )
+
 
 def generate_ground_state_frequency_files(
     filename: str,
@@ -224,7 +261,7 @@ def generate_ground_state_frequency_files(
     """
     chk_filename = os.path.splitext(os.path.basename(filename))[0] + ".chk"
     header_options = f"%chk={chk_filename}"
-    route_section = f"freq=(saveNM, HPModes) {dft_func}/{basis} nosymm charge"
+    route_section = f"freq=(saveNM, HPModes) {dft_func}/{basis} nosymm charge EmpiricalDispersion=GD3"
     title = "Ground State Frequency Calculations"
 
     generate_gaussian_input_file(
@@ -241,6 +278,7 @@ def generate_ground_state_frequency_files(
         title,
         header_options,
     )
+
 
 def generate_vertical_excitation_energy_file(
     filename: str,
@@ -262,8 +300,10 @@ def generate_vertical_excitation_energy_file(
     """
     chk_filename = os.path.splitext(os.path.basename(filename))[0] + ".chk"
     header_options = f"%chk={chk_filename}"
-    route_section = f"tda(nstates={nstates}, root={root}) {dft_func}/{basis} nosymm charge"
-    title = "Excited State Energy Calculations"
+    route_section = (
+        f"tda(nstates={nstates}, root={root}) {dft_func}/{basis} nosymm charge EmpiricalDispersion=GD3"
+    )
+    title = "Vertical Excitaion Energy Calculations"
 
     generate_gaussian_input_file(
         filename,
@@ -279,6 +319,7 @@ def generate_vertical_excitation_energy_file(
         title,
         header_options,
     )
+
 
 def generate_excited_state_optimization_files(
     filename: str,
@@ -294,14 +335,21 @@ def generate_excited_state_optimization_files(
     basis: str = "6-31g*",
     nstates: int = 6,
     root: int = 1,
+    opt_freq: bool = False,
 ):
     """
     Generates the Gaussian input file for excited state optimization calculations.
     """
     chk_filename = os.path.splitext(os.path.basename(filename))[0] + ".chk"
     header_options = f"%chk={chk_filename}"
-    route_section = f"opt tda(nstates={nstates}, root={root}) {dft_func}/{basis} nosymm charge"
-    title = "Excited State Optimization Calculations"
+    if opt_freq:
+        route_section = f"tda(nstates={nstates}, root={root}) opt freq(saveNM, HPModes) {dft_func}/{basis} nosymm charge EmpiricalDispersion=GD3"
+        title = "Excited State Optimization and Frequency Calculations"
+    else:
+        route_section = (
+            f"tda(nstates={nstates}, root={root}) opt {dft_func}/{basis} nosymm charge EmpiricalDispersion=GD3"
+        )
+        title = "Excited State Optimization Calculations"
 
     generate_gaussian_input_file(
         filename,
@@ -317,6 +365,7 @@ def generate_excited_state_optimization_files(
         title,
         header_options,
     )
+
 
 def generate_excited_state_frequency_files(
     filename: str,
@@ -339,8 +388,8 @@ def generate_excited_state_frequency_files(
     chk_filename = os.path.splitext(os.path.basename(filename))[0] + ".chk"
     header_options = f"%chk={chk_filename}"
     route_section = (
-        f"freq=(saveNM, HPModes) tda(nstates={nstates}, root={root}) "
-        f"{dft_func}/{basis} nosymm charge"
+        f"freq=(saveNM, HPModes) tda(nstates={nstates}, root={root})\n"
+        f"{dft_func}/{basis} nosymm charge EmpiricalDispersion=GD3"
     )
     title = "Excited State Frequency Calculations"
 
@@ -358,6 +407,7 @@ def generate_excited_state_frequency_files(
         title,
         header_options,
     )
+
 
 def generate_charge_files(
     filename: str,
@@ -394,8 +444,8 @@ def generate_charge_files(
 
     if excited_state:
         route_section = (
-            f"tda(nstates={nstates}, root={root}) pop={pop_keyword} "
-            f"{theory}/{basis} nosymm charge {iop_options} {scf_options}"
+            f"tda(nstates={nstates}, root={root}) pop={pop_keyword}\n"
+            f"{theory}/{basis} nosymm charge {iop_options} {scf_options} EmpiricalDispersion=GD3"
         )
         title = "Excited State Charge Calculations"
     else:
@@ -420,5 +470,58 @@ def generate_charge_files(
         header_options,
     )
 
+
+def generate_transition_charge_files(
+    filename: str,
+    dye_atom_labels_list: list[list[str]],
+    dye_coords_list: list[np.ndarray],
+    solvent_molecules: list[tuple[list[str], np.ndarray]],
+    qm_solvent_indices: list[int],
+    mm_solvent_indices: list[int],
+    solvent_charge_list: np.ndarray,
+    net_charge: int = 0,
+    spin_mult: int = 1,
+    theory: str = "HF",
+    basis: str = "6-31g*",
+    method: str = "SaveNTO",
+    nstates: int = 6,
+    root: int = 1,
+):
+    """
+    Generates the Gaussian input file for charge calculations.
+    """
+    chk_filename = os.path.splitext(os.path.basename(filename))[0] + ".chk"
+    header_options = f"%chk={chk_filename}"
+
+    if method == "MK":
+        pop_keyword = "(regular, MK)"
+    elif method == "ChelpG":
+        pop_keyword = "(regular, ChelpG)"
+    else:
+        pop_keyword = f"SaveNTO density(transition={root})"
+
+    route_section = (
+        f"tda(nstates={nstates}, root={root}) pop={pop_keyword}\n"
+        f"{theory}/{basis} nosymm charge EmpiricalDispersion=GD3"
+    )
+    title = "Transition State Charge Calculations"
+
+    generate_gaussian_input_file(
+        filename,
+        dye_atom_labels_list,
+        dye_coords_list,
+        solvent_molecules,
+        qm_solvent_indices,
+        mm_solvent_indices,
+        solvent_charge_list,
+        net_charge,
+        spin_mult,
+        route_section,
+        title,
+        header_options,
+    )
+
+
 if __name__ == "__main__":
     print("Script to Generate Gaussian Input Files")
+    dummy_gaussian_input_file("dummy.com")
