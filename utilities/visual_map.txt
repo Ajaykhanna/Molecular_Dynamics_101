@@ -1,0 +1,53 @@
+Start
+ |
+ |---> Parse Command-Line Arguments
+ |
+ |---> For Each Frame (frame 1 to N)
+         |
+         |---> Read Dyes and Solvent Atoms from Trajectory File
+         |       |
+         |       |---> For Each Dye
+         |               |
+         |               |---> Read Atom Labels and Coordinates
+         |               |---> If Dye to be MM Charges
+         |                       |
+         |                       |---> Read Charges from File
+         |                       |---> Replace Atom Labels with Charges
+         |
+         |---> Group Solvent Atoms into Molecules
+         |
+         |---> Determine QM and MM Regions
+         |       |
+         |       |---> Exclude Dyes Converted to MM Charges from QM Region
+         |       |---> For Each Solvent Molecule
+         |               |
+         |               |---> If Within QM Radius of Any QM Dye Atom
+         |                       |
+         |                       |---> Assign to QM Region
+         |                   Else
+         |                       |---> Assign to MM Region
+         |
+         |---> Write Output Files
+         |       |
+         |       |---> QM XYZ File
+         |       |       |
+         |       |       |---> Write QM Dyes and Solvent Molecules
+         |       |
+         |       |---> MM Point Charges File
+         |       |       |
+         |       |       |---> Write MM Dyes and Solvent Molecules
+         |       |
+         |       |---> TeraChem Input File
+         |       |---> Gaussian Input File
+         |
+         |---> Generate Diabatization Input Files
+         |       |
+         |       |---> File 1: All Dyes and MM Coordinates
+         |       |---> File 2: First Dye, Others as Zero Charges
+         |       |---> File 3: Second Dye, Others as Zero Charges
+         |
+ |---> End For Loop
+ |
+ |---> Print Completion Messages
+ |
+End

@@ -1,7 +1,7 @@
 %chk=gaussian_vee_5.0ang.chk
-#p tda(nstates=6, root=1) cam-b3lyp/6-31g* nosymm charge
+#p tda(nstates=6, root=1) cam-b3lyp/6-31g* nosymm charge EmpiricalDispersion=GD3
 
-Excited State Energy Calculations
+Vertical Excitaion Energy Calculations
 
 0 1
 N	20.961456	18.605639	24.679466
@@ -4494,4 +4494,5 @@ H	16.787363	20.503132	30.085859
 36.159012	-1.539734	6.909737	0.086600
 37.560188	-1.001999	7.911437	0.074600
 36.754803	0.053009	6.835999	0.088600
+
 

@@ -1,7 +1,8 @@
-%chk=gaussian_charge_5.0angs.chk
-#p pop=(regular, MK) HF/6-31g* nosymm charge iop(6/33=2) iop(6/42=6) iop(6/50=1) SCF=tight test
+%chk=gaussian_transition_charge_5.0angs.chk
+#p tda(nstates=6, root=1) pop=SaveNTO density(transition=1)
+cam-b3lyp/6-31g* nosymm charge EmpiricalDispersion=GD3
 
-Ground State Charge Calculations
+Transition State Charge Calculations
 
 0 1
 N	20.961456	18.605639	24.679466
