@@ -1,7 +1,7 @@
-%chk=gaussian_charge_5.0angs.chk
-#p pop=(regular, MK) HF/6-31g* nosymm charge iop(6/33=2) iop(6/42=6) iop(6/50=1) SCF=tight test
+%chk=diabat_all_dyes.chk
+#p TDA(nstates=6, root=1) charge cam-b3lyp/6-31g(d) nosymm EmpiricalDispersion=GD3
 
-Ground State Charge Calculations
+Dyes in Solvent
 
 0 1
 N	20.916695	18.640013	24.730598
@@ -4494,5 +4494,4 @@ H	19.617098	18.537889	29.518770
 35.771679	36.151833	5.518947	0.086600
 36.995022	36.143085	6.943291	0.074600
 36.144707	37.592888	6.486794	0.088600
-
 

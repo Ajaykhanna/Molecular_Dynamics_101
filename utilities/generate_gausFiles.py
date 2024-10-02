@@ -98,6 +98,60 @@ def write_mm_coordinates(
             )
 
 
+def write_qm_mm_coordinates(
+    gauss_file,
+    dye_atom_labels_list: list[list[str]],
+    dye_coords_list: list[np.ndarray],
+    solvent_molecules: list[tuple[list[str], np.ndarray]],
+    qm_solvent_indices: list[int],
+    mm_solvent_indices: list[int],
+    solvent_charge_list: np.ndarray,
+    dye_MM_charge_files,
+):
+    # Write QM coordinates
+    for dye_index, (dye_labels, dye_coords) in enumerate(
+        zip(dye_atom_labels_list, dye_coords_list), start=1
+    ):
+        if dye_index not in dye_MM_charge_files:
+            for label, coord in zip(dye_labels, dye_coords):
+                gauss_file.write(
+                    f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                )
+
+    for mol_idx in qm_solvent_indices:
+        mol_labels, mol_coords = solvent_molecules[mol_idx]
+        for label, coord in zip(mol_labels, mol_coords):
+            gauss_file.write(
+                f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+            )
+
+    gauss_file.write("\n")
+
+    # Write MM coordinates with charges (X Y Z charge)
+    # Include dyes converted to MM charges
+    for dye_index, (dye_labels, dye_coords) in enumerate(
+        zip(dye_atom_labels_list, dye_coords_list), start=1
+    ):
+        if dye_index in dye_MM_charge_files:
+            for label, coord in zip(dye_labels, dye_coords):
+                # In label, we have the charge as a string
+                charge = float(label)
+                gauss_file.write(
+                    f"{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\t{charge:.6f}\n"
+                )
+
+    for mol_idx in mm_solvent_indices:
+        mol_labels, mol_coords = solvent_molecules[mol_idx]
+        for atom_idx_in_mol, coord in enumerate(mol_coords):
+            # Use modulo in case the charge list is shorter than the number of atoms per solvent molecule
+            charge = solvent_charge_list[atom_idx_in_mol % len(solvent_charge_list)]
+            gauss_file.write(
+                f"{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\t{charge:.6f}\n"
+            )
+
+    gauss_file.write("\n")
+
+
 def generate_gaussian_input_file(
     filename: str,
     dye_atom_labels_list: list[list[str]],
@@ -106,6 +160,7 @@ def generate_gaussian_input_file(
     qm_solvent_indices: list[int],
     mm_solvent_indices: list[int],
     solvent_charge_list: np.ndarray,
+    dye_MM_charge_files,
     net_charge: int = 0,
     spin_mult: int = 1,
     route_section: str = "",
@@ -138,25 +193,17 @@ def generate_gaussian_input_file(
         gauss_file.write(f"{title}\n\n")
         gauss_file.write(f"{net_charge} {spin_mult}\n")
 
-        # Write QM coordinates
-        write_qm_coordinates(
+        # Write QM and MM coordinates with charges
+        write_qm_mm_coordinates(
             gauss_file,
             dye_atom_labels_list,
             dye_coords_list,
             solvent_molecules,
             qm_solvent_indices,
-        )
-
-        gauss_file.write("\n")
-
-        # Write MM coordinates with charges
-        write_mm_coordinates(
-            gauss_file,
-            solvent_molecules,
             mm_solvent_indices,
             solvent_charge_list,
+            dye_MM_charge_files,
         )
-
         gauss_file.write("\n")
 
         if extra_sections:
@@ -172,6 +219,7 @@ def generate_ground_state_energy_files(
     qm_solvent_indices: list[int],
     mm_solvent_indices: list[int],
     solvent_charge_list: np.ndarray,
+    dye_MM_charge_files,
     net_charge: int = 0,
     spin_mult: int = 1,
     dft_func: str = "cam-b3lyp",
@@ -193,6 +241,7 @@ def generate_ground_state_energy_files(
         qm_solvent_indices,
         mm_solvent_indices,
         solvent_charge_list,
+        dye_MM_charge_files,
         net_charge,
         spin_mult,
         route_section,
@@ -209,6 +258,7 @@ def generate_ground_state_optimization_files(
     qm_solvent_indices: list[int],
     mm_solvent_indices: list[int],
     solvent_charge_list: np.ndarray,
+    dye_MM_charge_files,
     net_charge: int = 0,
     spin_mult: int = 1,
     dft_func: str = "cam-b3lyp",
@@ -221,7 +271,9 @@ def generate_ground_state_optimization_files(
     chk_filename = os.path.splitext(os.path.basename(filename))[0] + ".chk"
     header_options = f"%chk={chk_filename}"
     if opt_freq:
-        route_section = f"opt freq {dft_func}/{basis} nosymm charge EmpiricalDispersion=GD3"
+        route_section = (
+            f"opt freq {dft_func}/{basis} nosymm charge EmpiricalDispersion=GD3"
+        )
         title = "Ground State Optimization and Frequency Calculations"
     else:
         route_section = f"opt {dft_func}/{basis} nosymm charge EmpiricalDispersion=GD3"
@@ -235,6 +287,7 @@ def generate_ground_state_optimization_files(
         qm_solvent_indices,
         mm_solvent_indices,
         solvent_charge_list,
+        dye_MM_charge_files,
         net_charge,
         spin_mult,
         route_section,
@@ -251,6 +304,7 @@ def generate_ground_state_frequency_files(
     qm_solvent_indices: list[int],
     mm_solvent_indices: list[int],
     solvent_charge_list: np.ndarray,
+    dye_MM_charge_files,
     net_charge: int = 0,
     spin_mult: int = 1,
     dft_func: str = "cam-b3lyp",
@@ -272,6 +326,7 @@ def generate_ground_state_frequency_files(
         qm_solvent_indices,
         mm_solvent_indices,
         solvent_charge_list,
+        dye_MM_charge_files,
         net_charge,
         spin_mult,
         route_section,
@@ -288,6 +343,7 @@ def generate_vertical_excitation_energy_file(
     qm_solvent_indices: list[int],
     mm_solvent_indices: list[int],
     solvent_charge_list: np.ndarray,
+    dye_MM_charge_files,
     net_charge: int = 0,
     spin_mult: int = 1,
     dft_func: str = "cam-b3lyp",
@@ -300,9 +356,7 @@ def generate_vertical_excitation_energy_file(
     """
     chk_filename = os.path.splitext(os.path.basename(filename))[0] + ".chk"
     header_options = f"%chk={chk_filename}"
-    route_section = (
-        f"tda(nstates={nstates}, root={root}) {dft_func}/{basis} nosymm charge EmpiricalDispersion=GD3"
-    )
+    route_section = f"tda(nstates={nstates}, root={root}) {dft_func}/{basis} nosymm charge EmpiricalDispersion=GD3"
     title = "Vertical Excitaion Energy Calculations"
 
     generate_gaussian_input_file(
@@ -313,6 +367,7 @@ def generate_vertical_excitation_energy_file(
         qm_solvent_indices,
         mm_solvent_indices,
         solvent_charge_list,
+        dye_MM_charge_files,
         net_charge,
         spin_mult,
         route_section,
@@ -329,6 +384,7 @@ def generate_excited_state_optimization_files(
     qm_solvent_indices: list[int],
     mm_solvent_indices: list[int],
     solvent_charge_list: np.ndarray,
+    dye_MM_charge_files,
     net_charge: int = 0,
     spin_mult: int = 1,
     dft_func: str = "cam-b3lyp",
@@ -346,9 +402,7 @@ def generate_excited_state_optimization_files(
         route_section = f"tda(nstates={nstates}, root={root}) opt freq(saveNM, HPModes) {dft_func}/{basis} nosymm charge EmpiricalDispersion=GD3"
         title = "Excited State Optimization and Frequency Calculations"
     else:
-        route_section = (
-            f"tda(nstates={nstates}, root={root}) opt {dft_func}/{basis} nosymm charge EmpiricalDispersion=GD3"
-        )
+        route_section = f"tda(nstates={nstates}, root={root}) opt {dft_func}/{basis} nosymm charge EmpiricalDispersion=GD3"
         title = "Excited State Optimization Calculations"
 
     generate_gaussian_input_file(
@@ -359,6 +413,7 @@ def generate_excited_state_optimization_files(
         qm_solvent_indices,
         mm_solvent_indices,
         solvent_charge_list,
+        dye_MM_charge_files,
         net_charge,
         spin_mult,
         route_section,
@@ -375,6 +430,7 @@ def generate_excited_state_frequency_files(
     qm_solvent_indices: list[int],
     mm_solvent_indices: list[int],
     solvent_charge_list: np.ndarray,
+    dye_MM_charge_files,
     net_charge: int = 0,
     spin_mult: int = 1,
     dft_func: str = "cam-b3lyp",
@@ -401,6 +457,7 @@ def generate_excited_state_frequency_files(
         qm_solvent_indices,
         mm_solvent_indices,
         solvent_charge_list,
+        dye_MM_charge_files,
         net_charge,
         spin_mult,
         route_section,
@@ -417,6 +474,7 @@ def generate_charge_files(
     qm_solvent_indices: list[int],
     mm_solvent_indices: list[int],
     solvent_charge_list: np.ndarray,
+    dye_MM_charge_files,
     net_charge: int = 0,
     spin_mult: int = 1,
     theory: str = "HF",
@@ -463,6 +521,7 @@ def generate_charge_files(
         qm_solvent_indices,
         mm_solvent_indices,
         solvent_charge_list,
+        dye_MM_charge_files,
         net_charge,
         spin_mult,
         route_section,
@@ -479,6 +538,7 @@ def generate_transition_charge_files(
     qm_solvent_indices: list[int],
     mm_solvent_indices: list[int],
     solvent_charge_list: np.ndarray,
+    dye_MM_charge_files,
     net_charge: int = 0,
     spin_mult: int = 1,
     theory: str = "HF",
@@ -514,12 +574,203 @@ def generate_transition_charge_files(
         qm_solvent_indices,
         mm_solvent_indices,
         solvent_charge_list,
+        dye_MM_charge_files,
         net_charge,
         spin_mult,
         route_section,
         title,
         header_options,
     )
+
+
+def generate_diabatization_inputs(
+    frame_dir,
+    dye_atom_labels_list,
+    dye_coords_list,
+    solvent_molecules,
+    qm_solvent_indices,
+    mm_solvent_indices,
+    solvent_charge_list,
+):
+    """
+    Generates the Gaussian input files required for diabatization calculations.
+
+    Args:
+        frame_dir (str): Directory of the current frame.
+        dye_atom_labels_list (list): List of lists containing atom labels for each dye.
+        dye_coords_list (list): List of numpy arrays containing coordinates for each dye.
+        solvent_molecules (list): List of tuples containing solvent atom labels and coordinates.
+        mm_solvent_indices (list): List of indices of solvent molecules in the MM region.
+        solvent_charge_list (np.ndarray): Array of solvent charge values.
+    """
+    # Common Gaussian keywords
+    gaussian_keywords_all = "#p TDA(nstates=6, root=1) charge cam-b3lyp/6-31g(d) nosymm EmpiricalDispersion=GD3"
+    gaussian_keywords_mono = "#p TDA(nstates=6, root=1) charge cam-b3lyp/6-31g(d) nosymm EmpiricalDispersion=GD3 density(transition=1)"
+
+    # Dimer: All dyes with QM and MM coordinates
+    filename_all = os.path.join(frame_dir, "diabat_all_dyes.com")
+    with open(filename_all, "w") as gauss_file:
+        write_gaussian_header(gauss_file, filename_all, gaussian_keywords_all)
+        gauss_file.write("0 1\n")
+
+        # Write all dyes
+        for dye_labels, dye_coords in zip(dye_atom_labels_list, dye_coords_list):
+            for label, coord in zip(dye_labels, dye_coords):
+                gauss_file.write(
+                    f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                )
+
+        for mol_idx in qm_solvent_indices:
+            mol_labels, mol_coords = solvent_molecules[mol_idx]
+            for label, coord in zip(mol_labels, mol_coords):
+                gauss_file.write(
+                    f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                )
+
+        gauss_file.write("\n")
+
+        # Write MM coordinates
+        write_gaussian_mm_coordinates(
+            gauss_file,
+            dye_atom_labels_list,
+            dye_coords_list,
+            solvent_molecules,
+            mm_solvent_indices,
+            solvent_charge_list,
+            zero_charges=False,
+        )
+
+    # Monomer-1: Only first dye, other dyes as point charges with zero charges
+    filename_dye1 = os.path.join(frame_dir, "diabat_dye1.com")
+    with open(filename_dye1, "w") as gauss_file:
+        write_gaussian_header(gauss_file, filename_dye1, gaussian_keywords_mono)
+        gauss_file.write("0 1\n")
+
+        # Write first dye
+        dye_labels = dye_atom_labels_list[0]
+        dye_coords = dye_coords_list[0]
+        for label, coord in zip(dye_labels, dye_coords):
+            gauss_file.write(
+                f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+            )
+
+        for mol_idx in qm_solvent_indices:
+            mol_labels, mol_coords = solvent_molecules[mol_idx]
+            for label, coord in zip(mol_labels, mol_coords):
+                gauss_file.write(
+                    f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                )
+
+        gauss_file.write("\n")
+
+        # Write MM coordinates
+        # Include other dyes as point charges with zero charges
+        other_dyes_labels = dye_atom_labels_list[1:]
+        other_dyes_coords = dye_coords_list[1:]
+        write_gaussian_mm_coordinates(
+            gauss_file,
+            other_dyes_labels,
+            other_dyes_coords,
+            solvent_molecules,
+            mm_solvent_indices,
+            solvent_charge_list,
+            zero_charges=True,
+        )
+
+    # Monomer-2: Only second dye, other dyes as point charges with zero charges
+    if len(dye_atom_labels_list) > 1:
+        filename_dye2 = os.path.join(frame_dir, "diabat_dye2.com")
+        with open(filename_dye2, "w") as gauss_file:
+            write_gaussian_header(gauss_file, filename_dye2, gaussian_keywords_mono)
+            gauss_file.write("0 1\n")
+
+            # Write second dye
+            dye_labels = dye_atom_labels_list[1]
+            dye_coords = dye_coords_list[1]
+            for label, coord in zip(dye_labels, dye_coords):
+                gauss_file.write(
+                    f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                )
+
+            for mol_idx in qm_solvent_indices:
+                mol_labels, mol_coords = solvent_molecules[mol_idx]
+                for label, coord in zip(mol_labels, mol_coords):
+                    gauss_file.write(
+                        f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                    )
+
+            gauss_file.write("\n")
+
+            # Write MM coordinates
+            # Include other dyes as point charges with zero charges
+            other_dyes_labels = dye_atom_labels_list[:1] + dye_atom_labels_list[2:]
+            other_dyes_coords = dye_coords_list[:1] + dye_coords_list[2:]
+            write_gaussian_mm_coordinates(
+                gauss_file,
+                other_dyes_labels,
+                other_dyes_coords,
+                solvent_molecules,
+                mm_solvent_indices,
+                solvent_charge_list,
+                zero_charges=True,
+            )
+
+
+def write_gaussian_header(gauss_file, filename, keywords):
+    """
+    Writes the header for Gaussian input files.
+
+    Args:
+        gauss_file (file object): Open file object for writing.
+        filename (str): Name of the Gaussian input file.
+        keywords (str): Gaussian job keywords.
+    """
+    chk_filename = os.path.splitext(os.path.basename(filename))[0] + ".chk"
+    gauss_file.write(f"%chk={chk_filename}\n")
+    gauss_file.write(f"{keywords}\n\n")
+    gauss_file.write("Dyes in Solvent\n\n")
+
+
+def write_gaussian_mm_coordinates(
+    gauss_file,
+    dye_atom_labels_list,
+    dye_coords_list,
+    solvent_molecules,
+    mm_solvent_indices,
+    solvent_charge_list,
+    zero_charges=False,
+):
+    """
+    Writes MM coordinates with charges into the Gaussian input file.
+
+    Args:
+        gauss_file (file object): Open file object for writing.
+        dye_atom_labels_list (list): List of lists of dye atom labels.
+        dye_coords_list (list): List of numpy arrays of dye coordinates.
+        solvent_molecules (list): List of solvent molecules (labels and coordinates).
+        mm_solvent_indices (list): List of indices of solvent molecules in the MM region.
+        solvent_charge_list (np.ndarray): Array of solvent charge values.
+        zero_charges (bool): If True, set charges to zero for dyes.
+    """
+    # Write dyes as MM charges
+    for dye_labels, dye_coords in zip(dye_atom_labels_list, dye_coords_list):
+        for coord in dye_coords:
+            charge = 0.0 if zero_charges else None
+            if charge is not None:
+                gauss_file.write(
+                    f"{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\t{charge:.6f}\n"
+                )
+
+    # Write solvent molecules
+    for mol_idx in mm_solvent_indices:
+        mol_labels, mol_coords = solvent_molecules[mol_idx]
+        for atom_idx_in_mol, coord in enumerate(mol_coords):
+            # Use modulo in case the charge list is shorter than the number of atoms per solvent molecule
+            charge = solvent_charge_list[atom_idx_in_mol % len(solvent_charge_list)]
+            gauss_file.write(
+                f"{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\t{charge:.6f}\n"
+            )
+    gauss_file.write("\n")
 
 
 if __name__ == "__main__":
