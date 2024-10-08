@@ -591,6 +591,8 @@ def generate_diabatization_inputs(
     qm_solvent_indices,
     mm_solvent_indices,
     solvent_charge_list,
+    net_charge,
+    spin_mult,
 ):
     """
     Generates the Gaussian input files required for diabatization calculations.
@@ -611,7 +613,7 @@ def generate_diabatization_inputs(
     filename_all = os.path.join(frame_dir, "diabat_all_dyes.com")
     with open(filename_all, "w") as gauss_file:
         write_gaussian_header(gauss_file, filename_all, gaussian_keywords_all)
-        gauss_file.write("0 1\n")
+        gauss_file.write(f"{net_charge} {spin_mult}\n")
 
         # Write all dyes
         for dye_labels, dye_coords in zip(dye_atom_labels_list, dye_coords_list):
@@ -644,7 +646,7 @@ def generate_diabatization_inputs(
     filename_dye1 = os.path.join(frame_dir, "diabat_dye1.com")
     with open(filename_dye1, "w") as gauss_file:
         write_gaussian_header(gauss_file, filename_dye1, gaussian_keywords_mono)
-        gauss_file.write("0 1\n")
+        gauss_file.write(f"{net_charge} {spin_mult}\n")
 
         # Write first dye
         dye_labels = dye_atom_labels_list[0]
@@ -682,7 +684,7 @@ def generate_diabatization_inputs(
         filename_dye2 = os.path.join(frame_dir, "diabat_dye2.com")
         with open(filename_dye2, "w") as gauss_file:
             write_gaussian_header(gauss_file, filename_dye2, gaussian_keywords_mono)
-            gauss_file.write("0 1\n")
+            gauss_file.write(f"{net_charge} {spin_mult}\n")
 
             # Write second dye
             dye_labels = dye_atom_labels_list[1]
