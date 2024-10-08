@@ -77,8 +77,8 @@ The script is executed via the command line and requires several arguments to fu
 
 - `--input` (`-i`): **(Required)** The trajectory file in XYZ format containing the frames to process.
 - `--solv_charge` (`-c`): **(Required)** File containing solvent point charge values (one per line).
-- `--qm_radius` (`-r_qm`): The radius in angstroms to include solvent molecules in the QM region around each dye (default: `5.0` Å).
-- `--mm_radius` (`-r_mm`): The radius for the MM region (default: `27.0` Å).
+- `--qm_radius` (`-r_qm`): **(Optional)** The radius in angstroms to include solvent molecules in the QM region around each dye (default: `5.0` Å).
+- `--mm_radius` (`-r_mm`): **(Optional)** The radius for the MM region (default: `27.0` Å).
 - `--nDyes` (`-n_dyes`): **(Required)** Number of dyes present in the trajectory.
 - `--dye_atoms` (`-d_atoms`): **(Required)** Number of atoms in each dye. Provide one integer per dye (e.g., `--dye_atoms 17 42`).
 - `--total_nDyes_atoms` (`-tot_d_atoms`): **(Required)** Total number of atoms in all dyes combined.
@@ -86,6 +86,8 @@ The script is executed via the command line and requires several arguments to fu
 - `--total_frames` (`-f`): **(Required)** Total number of frames (snapshots) in the trajectory file to process.
 - `--total_atoms` (`-a`): **(Required)** Total number of atoms per frame in the trajectory file.
 - `--dye_MM_charges`: **(Optional)** List of `dye_index:filename` pairs to specify dyes to be converted to MM charges (e.g., `1:first_dye_MM_charge.txt`).
+- `--net_charge` (`-q`): **(Optional)** Net charge of the system (default: `0`).
+- `--spin_mult` (`-s`): **(Optional)** Spin multiplicity of the system (default: `1`).
 - `--gaussian_inputs` (-gau_inputs): **(Optional)** Generate Gaussian input files for various QM calculations.
 -`--teracheem_inputs` (-tera_inputs): **(Optional)** Generate TeraChem input files for various QM calculations.`
 
@@ -104,8 +106,8 @@ python md_to_qmmm_input.py --input trajectory.xyz --solv_charge solv_charge.txt 
 ```bash
 python md_to_qmmm_input.py --input trajectory.xyz --solv_charge solv_charge.txt \
 --qm_radius 5 --nDyes 2 --dye_atoms 17 42 --total_nDyes_atoms 59 \
---nAtoms_solvent 3 --total_frames 10 --total_atoms 1000 \
---dye_MM_charges 1:first_dye_MM_charge.txt
+--nAtoms_solvent 3 --total_frames 10 --total_atoms 4489 \
+--dye_MM_charges 1:first_dye_MM_charge.txt --net_charge 0 --spin_mult 1
 ```
 
 #### Generating Diabatization Input Files
@@ -113,13 +115,13 @@ python md_to_qmmm_input.py --input trajectory.xyz --solv_charge solv_charge.txt 
 ```bash
 python md_to_qmmm_input.py --input trajectory.xyz --solv_charge solv_charge.txt \
 --qm_radius 5 --nDyes 2 --dye_atoms 17 42 --total_nDyes_atoms 59 \
---nAtoms_solvent 3 --total_frames 10 --total_atoms 1000 \
+--nAtoms_solvent 3 --total_frames 10 --total_atoms 4489 --net_charge 0 --spin_mult 1\
 --gaussian_inputs
 ```
 
 ## Note
 
-Currently, ``--dye_MM_charges and`` and ``--gaussian_inputs`` or ``--terachem_inputs`` are not compatible. Please use one at a time.
+Currently, ``--dye_MM_charges`` and ``--gaussian_inputs`` or ``--terachem_inputs`` are not compatible. Please use one at a time.
 
 ---
 
@@ -299,7 +301,7 @@ For any questions or issues, please open an issue on GitHub or contact me via em
    ```bash
    python md_to_qmmm_input.py --input trajectory.xyz --solv_charge solv_charge.txt \
    --qm_radius 5 --nDyes 2 --dye_atoms 17 42 --total_nDyes_atoms 59 \
-   --nAtoms_solvent 3 --total_frames 10 --total_atoms 1000
+   --nAtoms_solvent 10 --total_frames 10 --total_atoms 4489
    ```
 
 3. **Check the Output**:
