@@ -104,6 +104,23 @@ def parse_args():
     )
 
     parser.add_argument(
+        "--net_charge",
+        "-q",
+        type=int,
+        default=0,
+        required=False,
+        help="Net charge of the system",
+    )
+    parser.add_argument(
+        "--spin_mult",
+        "-s",
+        type=int,
+        default=1,
+        required=False,
+        help="Spin multiplicity of the system",
+    )
+
+    parser.add_argument(
         "--gaussian_inputs",
         "-gau_inputs",
         type=bool,
@@ -195,6 +212,8 @@ def process_snapshots(args):
     nDyes = args.nDyes
     dye_atoms_list = args.dye_atoms
     nAtoms_solvent = args.nAtoms_solvent
+    net_charge = args.net_charge
+    spin_mult = args.spin_mult
 
     if len(dye_atoms_list) != nDyes:
         raise ValueError(
@@ -391,6 +410,8 @@ def process_snapshots(args):
                 mm_solvent_indices,
                 solvent_charge_list,
                 dye_MM_charge_files,
+                net_charge=net_charge,
+                spin_mult=spin_mult,
             )
 
             generate_transition_charge_files(
@@ -403,6 +424,8 @@ def process_snapshots(args):
                 solvent_charge_list,
                 dye_MM_charge_files,
                 theory="cam-b3lyp",
+                net_charge=net_charge,
+                spin_mult=spin_mult,
             )
 
             generate_vertical_excitation_energy_file(
@@ -418,6 +441,8 @@ def process_snapshots(args):
                 basis="6-31g*",
                 nstates=6,
                 root=1,
+                net_charge=net_charge,
+                spin_mult=spin_mult,
             )
 
             # Generate Diabatization input files
@@ -429,6 +454,8 @@ def process_snapshots(args):
                 qm_solvent_indices,
                 mm_solvent_indices,
                 solvent_charge_list,
+                net_charge=net_charge,
+                spin_mult=spin_mult,
             )
 
         print(f"---> Snapshot {frame_dir} generated")
