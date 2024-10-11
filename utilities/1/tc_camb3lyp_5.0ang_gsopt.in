@@ -1,19 +1,12 @@
 # TeraChem Job-Control Info.
-charge         0
+charge         1
 spinmult       1
 basis          6-31G*
 method         camb3lyp
 
-# Excited State Calculation
-cis            yes
-cistarget      1
-cisnumstates   6
-cisguessvecs   6
-cisdiffdensity yes
-cismaxiter     55
-
-# Type of Job: Vertical Excitation Energy
-run           energy
+# Type of Job: Ground State Optimization
+run           minimize
+new_minimizer yes
 
 # XYZ Filename/path
 pointcharges  solute_solvent_5.0ang_mm.xyz
@@ -31,4 +24,11 @@ convthre      3.0e-7
 dftgrid       5
 gpus          all
 safemode      no
+
 end
+
+# Constraints
+$constraint_freeze
+XYZ 60 - 539
+$end
+

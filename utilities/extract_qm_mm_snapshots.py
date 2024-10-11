@@ -18,7 +18,10 @@ from generate_gausFiles import (
     generate_diabatization_inputs,
 )
 
-from generate_teraFiles import terachem_params
+from generate_teraFiles import (
+    generate_tc_vertical_excitation_energy_file,
+    generate_tc_ground_state_optimization_file,
+)
 
 
 # Function to parse command line arguments
@@ -249,12 +252,33 @@ def process_snapshots(args):
         mm_filename = os.path.join(
             frame_dir, f"solute_solvent_{args.qm_radius}ang_mm.xyz"
         )
-        tc_input_filename = os.path.join(
-            frame_dir, f"tc_camb3lyp_{args.qm_radius}ang_opt_gs.in"
-        )
         if args.terachem_inputs:
-            with open(tc_input_filename, "w") as params_file:
-                params_file.write(terachem_params(mm_filename, qm_filename))
+            tc_vee_input_filename = os.path.join(
+                frame_dir, f"tc_camb3lyp_{args.qm_radius}ang_vee.in"
+            )
+            tc_gsopt_input_filename = os.path.join(
+                frame_dir, f"tc_camb3lyp_{args.qm_radius}ang_gsopt.in"
+            )
+            with open(tc_vee_input_filename, "w") as vee_file:
+                vee_file.write(
+                    generate_tc_vertical_excitation_energy_file(
+                        mm_filename,
+                        qm_filename,
+                        net_charge=args.net_charge,
+                        spin_mult=args.spin_mult,
+                    )
+                )
+
+            with open(tc_gsopt_input_filename, "w") as gsopt_file:
+                gsopt_file.write(
+                    generate_tc_ground_state_optimization_file(
+                        mm_filename,
+                        qm_filename,
+                        net_charge=args.net_charge,
+                        spin_mult=args.spin_mult,
+                        nDyes_atoms=args.total_nDyes_atoms,
+                    )
+                )
 
         dye_coords_list = []
         dye_atom_labels_list = []
@@ -399,7 +423,7 @@ def process_snapshots(args):
                 frame_dir,
                 f"gaussian_transition_charge_{args.qm_radius}angs.com",
             )
-            
+
             # Generate Gaussian input file
             generate_charge_files(
                 gaussian_charge_filename,
