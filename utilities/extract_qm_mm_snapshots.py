@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 # ------------------------------------------------------------------------
-# Python Script to Generate TeraChem And Gaussian Input Files
+# Automate QM/MM Simulations
+# Python Program to Generate TeraChem And Gaussian Input Files
 # Input Files in Explicit Solvent Environment
 # For Multiple Dyes (>=2) in a sigle solvent
 # By: Ajay Khanna | Sep.13.2024 [akhanna2@ucmerced.edu] | Isborn Lab
@@ -268,33 +269,6 @@ def process_snapshots(args):
         mm_filename = os.path.join(
             frame_dir, f"solute_solvent_{args.qm_radius}ang_mm.xyz"
         )
-        if args.terachem_inputs:
-            tc_vee_input_filename = os.path.join(
-                frame_dir, f"tc_camb3lyp_{args.qm_radius}ang_vee.in"
-            )
-            tc_gsopt_input_filename = os.path.join(
-                frame_dir, f"tc_camb3lyp_{args.qm_radius}ang_gsopt.in"
-            )
-            with open(tc_vee_input_filename, "w") as vee_file:
-                vee_file.write(
-                    generate_tc_vertical_excitation_energy_file(
-                        mm_filename,
-                        qm_filename,
-                        net_charge=args.net_charge,
-                        spin_mult=args.spin_mult,
-                    )
-                )
-
-            with open(tc_gsopt_input_filename, "w") as gsopt_file:
-                gsopt_file.write(
-                    generate_tc_ground_state_optimization_file(
-                        mm_filename,
-                        qm_filename,
-                        net_charge=args.net_charge,
-                        spin_mult=args.spin_mult,
-                        nDyes_atoms=args.total_nDyes_atoms,
-                    )
-                )
 
         dye_coords_list = []
         dye_atom_labels_list = []
@@ -395,6 +369,7 @@ def process_snapshots(args):
         # Now write the QM and MM files, preserving the order
         with open(qm_filename, "w") as qm_file, open(mm_filename, "w") as mm_file:
             total_qm_atoms = 0
+            total_mm_atoms = 0
 
             # Write dye atoms
             for dye_index, (dye_labels, dye_coords, dye_charges) in enumerate(
@@ -442,10 +417,13 @@ def process_snapshots(args):
                         mm_file.write(
                             f"{charge:.6f}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
                         )
+                        total_mm_atoms += 1
                 # Else: discard solvent molecule (do not write it to any file)
 
         # Prepend total number of atoms to QM file
         prepend_line(qm_filename, str(total_qm_atoms))
+        # Prepend total number of atoms to MM file
+        prepend_line(mm_filename, str(total_mm_atoms))
 
         if args.gaussian_inputs:
             gaussian_input_filename = os.path.join(
@@ -519,6 +497,34 @@ def process_snapshots(args):
                 net_charge=net_charge,
                 spin_mult=spin_mult,
             )
+
+        if args.terachem_inputs:
+            tc_vee_input_filename = os.path.join(
+                frame_dir, f"tc_camb3lyp_{args.qm_radius}ang_vee.in"
+            )
+            tc_gsopt_input_filename = os.path.join(
+                frame_dir, f"tc_camb3lyp_{args.qm_radius}ang_gsopt.in"
+            )
+            with open(tc_vee_input_filename, "w") as vee_file:
+                vee_file.write(
+                    generate_tc_vertical_excitation_energy_file(
+                        mm_filename,
+                        qm_filename,
+                        net_charge=args.net_charge,
+                        spin_mult=args.spin_mult,
+                    )
+                )
+
+            with open(tc_gsopt_input_filename, "w") as gsopt_file:
+                gsopt_file.write(
+                    generate_tc_ground_state_optimization_file(
+                        mm_filename,
+                        qm_filename,
+                        net_charge=args.net_charge,
+                        spin_mult=args.spin_mult,
+                        nDyes_atoms=args.total_nDyes_atoms,
+                    )
+                )
 
         # print(f"---> Snapshot {frame_dir} generated")
         show_progress_bar(frame + 1, frame_length=args.total_frames)
