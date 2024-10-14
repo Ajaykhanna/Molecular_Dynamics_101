@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 # ------------------------------------------------------------------------
-# Python Script to Generate TeraChem And Gaussian Input Files
+# Automate QM/MM Simulations
+# Python Program to Generate TeraChem And Gaussian Input Files
 # Input Files in Explicit Solvent Environment
 # For Multiple Dyes (>=2) in a sigle solvent
 # By: Ajay Khanna | Sep.13.2024 [akhanna2@ucmerced.edu] | Isborn Lab
