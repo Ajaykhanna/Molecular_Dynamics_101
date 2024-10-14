@@ -78,7 +78,7 @@ The script is executed via the command line and requires several arguments to fu
 - `--input` (`-i`): **(Required)** The trajectory file in XYZ format containing the frames to process.
 - `--solv_charge` (`-c`): **(Required)** File containing solvent point charge values (one per line).
 - `--qm_radius` (`-r_qm`): **(Optional)** The radius in angstroms to include solvent molecules in the QM region around each dye (default: `5.0` Å).
-- `--mm_radius` (`-r_mm`): **(Optional)** The radius for the MM region (default: `27.0` Å).
+- `--mm_radius` (`-r_mm`): **(Optional)** The radius for the MM region (default: None (Include all solvent molecules)).
 - `--nDyes` (`-n_dyes`): **(Required)** Number of dyes present in the trajectory.
 - `--dye_atoms` (`-d_atoms`): **(Required)** Number of atoms in each dye. Provide one integer per dye (e.g., `--dye_atoms 17 42`).
 - `--total_nDyes_atoms` (`-tot_d_atoms`): **(Required)** Total number of atoms in all dyes combined.
@@ -99,6 +99,15 @@ The script is executed via the command line and requires several arguments to fu
 python md_to_qmmm_input.py --input trajectory.xyz --solv_charge solv_charge.txt \
 --qm_radius 5 --nDyes 2 --dye_atoms 17 42 --total_nDyes_atoms 59 \
 --nAtoms_solvent 3 --total_frames 10 --total_atoms 1000
+```
+
+#### Defining a Custom MM Radius
+
+```bash
+python md_to_qmmm_input.py --input trajectory.xyz --solv_charge solv_charge.txt \
+--qm_radius 5 --mm_radius 10 --nDyes 2 --dye_atoms 17 42 \
+--total_nDyes_atoms 59 --nAtoms_solvent 3 --total_frames 10 \
+--total_atoms 1000
 ```
 
 #### Converting a Dye to MM Charges

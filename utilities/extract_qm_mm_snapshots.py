@@ -61,9 +61,9 @@ def parse_args():
         "--mm_radius",
         "-r_mm",
         type=float,
-        default=27.0,
+        default=None,
         required=False,
-        help="MM Radius (default=27.0A)",
+        help="MM Radius in angstroms (default: include all solvent molecules outside QM region)",
     )
     parser.add_argument(
         "--nDyes", "-n_dyes", type=int, required=True, help="Number of Dyes"
@@ -144,28 +144,44 @@ def parse_args():
     return parser.parse_args()
 
 
-# Function to check if any atom in the solvent molecule is within qm_radius of any dye atom
-def is_within_qm_radius(dye_coords_list, solvent_mol_coords, qm_radius):
+def show_progress_bar(progress, frame_length=10):
     """
-    Check if any atom in the solvent molecule is within the QM radius of any dye atom.
+    Display a progress bar for the current frame in a sequence of frames.
 
     Args:
-        dye_coords_list (list of np.ndarray): List of coordinates for each dye's atoms.
-        solvent_mol_coords (np.ndarray): Coordinates of the solvent molecule's atoms.
-        qm_radius (float): QM radius in angstroms.
+        progress (int): The current progress or frame number.
+        frame_length (int, optional): The total number of frames to display in the progress bar. Defaults to 10.
 
     Returns:
-        bool: True if solvent molecule is within QM radius of any dye, False otherwise.
+        None
+    """
+    frame_display = " ".join(str(i + 1) for i in range(frame_length))
+    current_frame = progress % frame_length + 1
+    print(f"\rFrame [{frame_display}] - Current Frame: {current_frame}", end="")
+
+
+# Function to check if any atom in the solvent molecule is within given radius of any dye atom
+def is_within_radius(dye_coords_list, mol_coords, radius):
+    """
+    Checks if any atom in the molecule is within the given radius of any dye atom.
+
+    Args:
+        dye_coords_list (list of np.ndarray): List containing arrays of dye atom coordinates.
+        mol_coords (np.ndarray): Coordinates of atoms in a molecule (solvent or dye).
+        radius (float): The radius threshold.
+
+    Returns:
+        bool: True if the molecule is within the radius of any dye atom, False otherwise.
     """
     for dye_coords in dye_coords_list:
+        # Compute distances between all dye atoms and molecule atoms
         distances = np.sqrt(
             np.sum(
-                (dye_coords[:, np.newaxis, :] - solvent_mol_coords[np.newaxis, :, :])
-                ** 2,
+                (dye_coords[:, np.newaxis, :] - mol_coords[np.newaxis, :, :]) ** 2,
                 axis=2,
             )
         )
-        if np.any(distances < qm_radius):
+        if np.any(distances < radius):
             return True
     return False
 
@@ -347,21 +363,34 @@ def process_snapshots(args):
             mol_labels = solvent_atom_labels[i : i + nAtoms_solvent]
             solvent_molecules.append((mol_labels, mol_coords))
 
-        # Determine which solvent molecules are within qm_radius of any dye
-        # Exclude dyes converted to MM charges from QM region
+        # Determine which solvent molecules are within QM and MM radii
+        # Exclude dyes converted to MM charges from QM and MM region determination
         qm_dye_coords_list = []
+        mm_dye_coords_list = []
         for dye_index, (coords, charges) in enumerate(
             zip(dye_coords_list, dye_atom_charges_list), start=1
         ):
             if dye_index not in dye_MM_charge_files:
                 qm_dye_coords_list.append(coords)
-        qm_solvent_indices = []
-        mm_solvent_indices = []
-        for mol_idx, (mol_labels, mol_coords) in enumerate(solvent_molecules):
-            if is_within_qm_radius(qm_dye_coords_list, mol_coords, args.qm_radius):
-                qm_solvent_indices.append(mol_idx)
             else:
+                mm_dye_coords_list.append(coords)
+
+        # Solvent molecules within QM radius
+        qm_solvent_indices = []
+        # Solvent molecules within MM radius (but outside QM radius)
+        mm_solvent_indices = []
+        # Solvent molecules beyond MM radius
+        discarded_solvent_indices = []
+
+        for mol_idx, (mol_labels, mol_coords) in enumerate(solvent_molecules):
+            if is_within_radius(qm_dye_coords_list, mol_coords, args.qm_radius):
+                qm_solvent_indices.append(mol_idx)
+            elif args.mm_radius is None or is_within_radius(
+                qm_dye_coords_list, mol_coords, args.mm_radius
+            ):
                 mm_solvent_indices.append(mol_idx)
+            else:
+                discarded_solvent_indices.append(mol_idx)
 
         # Now write the QM and MM files, preserving the order
         with open(qm_filename, "w") as qm_file, open(mm_filename, "w") as mm_file:
@@ -373,11 +402,19 @@ def process_snapshots(args):
                 start=1,
             ):
                 if dye_index in dye_MM_charge_files:
-                    # Write to MM file with charges
-                    for label, coord in zip(dye_labels, dye_coords):
-                        mm_file.write(
-                            f"{label}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
-                        )
+                    # Check if dye is within MM radius
+                    include_in_mm = True
+                    if args.mm_radius is not None:
+                        if not is_within_radius(
+                            qm_dye_coords_list, dye_coords, args.mm_radius
+                        ):
+                            include_in_mm = False
+                    if include_in_mm:
+                        # Write to MM file with charges
+                        for label, coord in zip(dye_labels, dye_coords):
+                            mm_file.write(
+                                f"{label}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                            )
                 else:
                     # Write to QM file
                     for label, coord in zip(dye_labels, dye_coords):
@@ -392,10 +429,10 @@ def process_snapshots(args):
                     # Write solvent molecule to QM file
                     for label, coord in zip(mol_labels, mol_coords):
                         qm_file.write(
-                            f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                            f"{label}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
                         )
                         total_qm_atoms += 1
-                else:
+                elif mol_idx in mm_solvent_indices:
                     # Write solvent molecule to MM file with charges
                     for atom_idx_in_mol, coord in enumerate(mol_coords):
                         # Use modulo in case the charge list is shorter than the number of atoms per solvent molecule
@@ -405,6 +442,7 @@ def process_snapshots(args):
                         mm_file.write(
                             f"{charge:.6f}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
                         )
+                # Else: discard solvent molecule (do not write it to any file)
 
         # Prepend total number of atoms to QM file
         prepend_line(qm_filename, str(total_qm_atoms))
@@ -482,9 +520,10 @@ def process_snapshots(args):
                 spin_mult=spin_mult,
             )
 
-        print(f"---> Snapshot {frame_dir} generated")
+        # print(f"---> Snapshot {frame_dir} generated")
+        show_progress_bar(frame + 1, frame_length=args.total_frames)
 
-    print("------> Done or Failed!, Still Buy Developer a Beer!! <------")
+    print("\n------> Done or Failed!, Still Buy Developer a Beer!! <------")
 
 
 if __name__ == "__main__":
