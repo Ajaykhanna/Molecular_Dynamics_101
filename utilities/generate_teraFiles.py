@@ -49,13 +49,13 @@ def get_constaint_freeze(nDyes_atoms, coordinate_file, opt_constraints=True):
         total_qm_atoms = int(lines[0])
     
     if opt_constraints:
-        return f"""# Constraints
+        return f"""# Freezing Atom's XYZ Coordinates
 $constraint_freeze
-XYZ {nDyes_atoms + 1} - {total_qm_atoms}
+xyz {nDyes_atoms + 1}-{total_qm_atoms}
 $end
 """
     else:
-        return f"""# Constraints
+        return f"""# Freezing Atoms
 $constraints
 {''.join(f'atom {i}{newline}' for i in range(nDyes_atoms + 1, total_qm_atoms + 1))}
 $end

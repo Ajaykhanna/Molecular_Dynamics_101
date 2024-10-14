@@ -1,12 +1,13 @@
 # TeraChem Job-Control Info.
-charge         1
+charge         0
 spinmult       1
 basis          6-31G*
 method         camb3lyp
 
 # Type of Job: Vertical Excitation Energy
 run           energy
-# Excited State Calculation
+
+# Excited State Parameters
 cis            yes
 cistarget      1
 cisnumstates   6

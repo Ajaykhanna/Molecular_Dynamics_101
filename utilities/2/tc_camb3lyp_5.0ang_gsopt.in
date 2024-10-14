@@ -1,5 +1,5 @@
 # TeraChem Job-Control Info.
-charge         1
+charge         0
 spinmult       1
 basis          6-31G*
 method         camb3lyp
@@ -27,8 +27,8 @@ safemode      no
 
 end
 
-# Constraints
+# Freezing Atom's XYZ Coordinates
 $constraint_freeze
-XYZ 60 - 549
+xyz 60-549
 $end
 
