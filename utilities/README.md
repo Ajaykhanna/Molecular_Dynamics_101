@@ -75,7 +75,7 @@ The script is executed via the command line and requires several arguments to fu
 
 ### Command-Line Arguments
 
-- `--input` (`-i`): **(Required)** The trajectory file in XYZ format containing the frames to process.
+- `--input` (`-i`): **(Required)** The trajectory file in XYZ format containing the frames to process. This XYZ can have either alphanumeric atomic symbols (C1 X Y Z) or just atomic sybmols (C X Y Z). For Alphanumeric XYZ format, the script will automatically convert to atomic symbols when passed "--xyz_alphanumeric or --xyzint" argument.
 - `--solv_charge` (`-c`): **(Required)** File containing solvent point charge values (one per line).
 - `--qm_radius` (`-r_qm`): **(Optional)** The radius in angstroms to include solvent molecules in the QM region around each dye (default: `5.0` Å).
 - `--mm_radius` (`-r_mm`): **(Optional)** The radius for the MM region (default: None (Include all solvent molecules)).
@@ -88,8 +88,9 @@ The script is executed via the command line and requires several arguments to fu
 - `--dye_MM_charges`: **(Optional)** List of `dye_index:filename` pairs to specify dyes to be converted to MM charges (e.g., `1:first_dye_MM_charge.txt`).
 - `--net_charge` (`-q`): **(Optional)** Net charge of the system (default: `0`).
 - `--spin_mult` (`-s`): **(Optional)** Spin multiplicity of the system (default: `1`).
-- `--gaussian_inputs` (-gau_inputs): **(Optional)** Generate Gaussian input files for various QM calculations.
--`--teracheem_inputs` (-tera_inputs): **(Optional)** Generate TeraChem input files for various QM calculations.`
+- `--gaussian_inputs` (-gau_inputs): **(Optional)** Generate Gaussian input files for various QM calculations (default = False).
+- `--teracheem_inputs` (-tera_inputs): **(Optional)** Generate TeraChem input files for various QM calculations (default = False).
+- `--xyz_alphanumeric` (-xyzint): **(Optional)** Use alphanumeric atomic symbols (C1 X Y Z) instead of atomic symbols (C X Y Z) in the XYZ file (default = False).
 
 ### Example
 
