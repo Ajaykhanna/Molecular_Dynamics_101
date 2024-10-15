@@ -75,7 +75,7 @@ The script is executed via the command line and requires several arguments to fu
 
 ### Command-Line Arguments
 
-- `--input` (`-i`): **(Required)** The trajectory file in XYZ format containing the frames to process.
+- `--input` (`-i`): **(Required)** The trajectory file in XYZ format containing the frames to process. This XYZ can have either alphanumeric atomic symbols (C1 X Y Z) or just atomic sybmols (C X Y Z). For Alphanumeric XYZ format, the script will automatically convert to atomic symbols when passed "--xyz_alphanumeric or --xyzint" argument.
 - `--solv_charge` (`-c`): **(Required)** File containing solvent point charge values (one per line).
 - `--qm_radius` (`-r_qm`): **(Optional)** The radius in angstroms to include solvent molecules in the QM region around each dye (default: `5.0` Å).
 - `--mm_radius` (`-r_mm`): **(Optional)** The radius for the MM region (default: None (Include all solvent molecules)).
@@ -88,17 +88,18 @@ The script is executed via the command line and requires several arguments to fu
 - `--dye_MM_charges`: **(Optional)** List of `dye_index:filename` pairs to specify dyes to be converted to MM charges (e.g., `1:first_dye_MM_charge.txt`).
 - `--net_charge` (`-q`): **(Optional)** Net charge of the system (default: `0`).
 - `--spin_mult` (`-s`): **(Optional)** Spin multiplicity of the system (default: `1`).
-- `--gaussian_inputs` (-gau_inputs): **(Optional)** Generate Gaussian input files for various QM calculations.
--`--teracheem_inputs` (-tera_inputs): **(Optional)** Generate TeraChem input files for various QM calculations.`
+- `--gaussian_inputs` (-gau_inputs): **(Optional)** Generate Gaussian input files for various QM calculations (default = False).
+- `--teracheem_inputs` (-tera_inputs): **(Optional)** Generate TeraChem input files for various QM calculations (default = False).
+- `--xyz_alphanumeric` (-xyzint): **(Optional)** Use alphanumeric atomic symbols (C1 X Y Z) instead of atomic symbols (C X Y Z) in the XYZ file (default = False).
 
 ### Example
 
 #### With one dye/ligand/molecule/choromophore
 
 ```bash
-python md_to_qmmm_input.py --input twoframes_example.xyz --solv_charge solv_charge.txt \
+python md_to_qmmm_input.py --input oneDye_traj_example.xyz --solv_charge solv_charge.txt \
 --qm_radius 5 --nDyes 1 --dye_atoms 17 --total_nDyes_atoms 17 \
---nAtoms_solvent 10 --total_frames 10 --total_atoms 4489
+--nAtoms_solvent 10 --total_frames 5 --total_atoms 10077
 ```
 
 #### With two or more dye/ligand/molecule/choromophore
@@ -168,12 +169,20 @@ O1    1.234567    2.345678    3.456789
 - **Content**: Charge values corresponding to each atom in a single solvent molecule.
 - **Format**: One charge value per line.
 
-**Example** (for a solvent molecule with 3 atoms):
+**Example** (for a DMSO solvent molecule with 10 atoms):
+S O C C H H H H H H
 
-```
-0.423
--0.846
-0.423
+```txt
+ 0.2685
+-0.5063
+-0.1309
+-0.1309
+ 0.0886
+ 0.0866
+ 0.0746
+ 0.0866
+ 0.0746
+ 0.0886
 ```
 
 ### Dye MM Charge Files

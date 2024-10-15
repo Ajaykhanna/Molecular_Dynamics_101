@@ -127,19 +127,25 @@ def parse_args():
     parser.add_argument(
         "--gaussian_inputs",
         "-gau_inputs",
-        type=bool,
-        default=False,
+        action="store_true",
         required=False,
         help="Generate Gaussian input files (default=False)",
     )
 
     parser.add_argument(
         "--terachem_inputs",
-        "-tera_inputs",
-        type=bool,
-        default=False,
+        "-tc_inputs",
+        action="store_true",
         required=False,
         help="Generate TeraChem input files (default=False)",
+    )
+
+    parser.add_argument(
+        "--xyz_alphanumeric",
+        "-xyzint",
+        action="store_true",
+        required=False,
+        help="If True, Atomic Symbols are Alphanumeric (e.g. C1, C2, H1, H3 etc) (default=True)",
     )
 
     return parser.parse_args()
@@ -393,9 +399,14 @@ def process_snapshots(args):
                 else:
                     # Write to QM file
                     for label, coord in zip(dye_labels, dye_coords):
-                        qm_file.write(
-                            f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
-                        )
+                        if args.xyz_alphanumeric:
+                            qm_file.write(
+                                f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                            )
+                        else:
+                            qm_file.write(
+                                f"{label}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                            )
                         total_qm_atoms += 1
 
             # Write solvent molecules
@@ -403,9 +414,14 @@ def process_snapshots(args):
                 if mol_idx in qm_solvent_indices:
                     # Write solvent molecule to QM file
                     for label, coord in zip(mol_labels, mol_coords):
-                        qm_file.write(
-                            f"{label}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
-                        )
+                        if args.xyz_alphanumeric:
+                            qm_file.write(
+                                f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                            )
+                        else:
+                            qm_file.write(
+                                f"{label}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                            )
                         total_qm_atoms += 1
                 elif mol_idx in mm_solvent_indices:
                     # Write solvent molecule to MM file with charges
@@ -452,6 +468,7 @@ def process_snapshots(args):
                 dye_MM_charge_files,
                 net_charge=net_charge,
                 spin_mult=spin_mult,
+                xyzInt=args.xyz_alphanumeric,
             )
 
             generate_transition_charge_files(
@@ -466,6 +483,7 @@ def process_snapshots(args):
                 theory="cam-b3lyp",
                 net_charge=net_charge,
                 spin_mult=spin_mult,
+                xyzInt=args.xyz_alphanumeric,
             )
 
             generate_vertical_excitation_energy_file(
@@ -483,6 +501,7 @@ def process_snapshots(args):
                 root=1,
                 net_charge=net_charge,
                 spin_mult=spin_mult,
+                xyzInt=args.xyz_alphanumeric,
             )
 
             # Generate Diabatization input files
@@ -496,6 +515,7 @@ def process_snapshots(args):
                 solvent_charge_list,
                 net_charge=net_charge,
                 spin_mult=spin_mult,
+                xyzInt=args.xyz_alphanumeric,
             )
 
         if args.terachem_inputs:

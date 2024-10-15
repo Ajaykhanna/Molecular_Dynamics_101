@@ -47,6 +47,7 @@ def write_qm_coordinates(
     dye_coords_list: list[np.ndarray],
     solvent_molecules: list[tuple[list[str], np.ndarray]],
     qm_solvent_indices: list[int],
+    xyzInt: bool = True,
 ):
     """
     Writes the QM coordinates to the Gaussian input file.
@@ -60,18 +61,28 @@ def write_qm_coordinates(
     """
     for dye_labels, dye_coords in zip(dye_atom_labels_list, dye_coords_list):
         for label, coord in zip(dye_labels, dye_coords):
-            gauss_file.write(
-                f"{remove_integers_from_symbol(label)}\t"
-                f"{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
-            )
+            if xyzInt:
+                gauss_file.write(
+                    f"{remove_integers_from_symbol(label)}\t"
+                    f"{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                )
+            else:
+                gauss_file.write(
+                    f"{label}\t" f"{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                )
 
     for mol_idx in qm_solvent_indices:
         mol_labels, mol_coords = solvent_molecules[mol_idx]
         for label, coord in zip(mol_labels, mol_coords):
-            gauss_file.write(
-                f"{remove_integers_from_symbol(label)}\t"
-                f"{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
-            )
+            if xyzInt:
+                gauss_file.write(
+                    f"{remove_integers_from_symbol(label)}\t"
+                    f"{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                )
+            else:
+                gauss_file.write(
+                    f"{label}\t" f"{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                )
 
 
 def write_mm_coordinates(
@@ -107,6 +118,7 @@ def write_qm_mm_coordinates(
     mm_solvent_indices: list[int],
     solvent_charge_list: np.ndarray,
     dye_MM_charge_files,
+    xyzInt: bool = True,
 ):
     # Write QM coordinates
     for dye_index, (dye_labels, dye_coords) in enumerate(
@@ -114,16 +126,26 @@ def write_qm_mm_coordinates(
     ):
         if dye_index not in dye_MM_charge_files:
             for label, coord in zip(dye_labels, dye_coords):
-                gauss_file.write(
-                    f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
-                )
+                if xyzInt:
+                    gauss_file.write(
+                        f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                    )
+                else:
+                    gauss_file.write(
+                        f"{label}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                    )
 
     for mol_idx in qm_solvent_indices:
         mol_labels, mol_coords = solvent_molecules[mol_idx]
         for label, coord in zip(mol_labels, mol_coords):
-            gauss_file.write(
-                f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
-            )
+            if xyzInt:
+                gauss_file.write(
+                    f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                )
+            else:
+                gauss_file.write(
+                    f"{label}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                )
 
     gauss_file.write("\n")
 
@@ -167,6 +189,7 @@ def generate_gaussian_input_file(
     title: str = "",
     header_options: str = "",
     extra_sections: str = "",
+    xyzInt: bool = True,
 ):
     """
     Generic function to generate Gaussian input files.
@@ -203,6 +226,7 @@ def generate_gaussian_input_file(
             mm_solvent_indices,
             solvent_charge_list,
             dye_MM_charge_files,
+            xyzInt,
         )
         gauss_file.write("\n")
 
@@ -224,6 +248,7 @@ def generate_ground_state_energy_files(
     spin_mult: int = 1,
     dft_func: str = "cam-b3lyp",
     basis: str = "6-31g*",
+    xyzInt: bool = True,
 ):
     """
     Generates the Gaussian input file for ground state energy calculations.
@@ -247,6 +272,7 @@ def generate_ground_state_energy_files(
         route_section,
         title,
         header_options,
+        xyzInt=xyzInt,
     )
 
 
@@ -264,6 +290,7 @@ def generate_ground_state_optimization_files(
     dft_func: str = "cam-b3lyp",
     basis: str = "6-31g*",
     opt_freq: bool = False,
+    xyzInt: bool = True,
 ):
     """
     Generates the Gaussian input file for ground state optimization calculations.
@@ -293,6 +320,7 @@ def generate_ground_state_optimization_files(
         route_section,
         title,
         header_options,
+        xyzInt=xyzInt,
     )
 
 
@@ -309,6 +337,7 @@ def generate_ground_state_frequency_files(
     spin_mult: int = 1,
     dft_func: str = "cam-b3lyp",
     basis: str = "6-31g*",
+    xyzInt: bool = True,
 ):
     """
     Generates the Gaussian input file for ground state frequency calculations.
@@ -332,6 +361,7 @@ def generate_ground_state_frequency_files(
         route_section,
         title,
         header_options,
+        xyzInt=xyzInt,
     )
 
 
@@ -350,6 +380,7 @@ def generate_vertical_excitation_energy_file(
     basis: str = "6-31g*",
     nstates: int = 6,
     root: int = 1,
+    xyzInt: bool = True,
 ):
     """
     Generates the Gaussian input file for vertical excitation energy calculations.
@@ -373,6 +404,7 @@ def generate_vertical_excitation_energy_file(
         route_section,
         title,
         header_options,
+        xyzInt=xyzInt,
     )
 
 
@@ -392,6 +424,7 @@ def generate_excited_state_optimization_files(
     nstates: int = 6,
     root: int = 1,
     opt_freq: bool = False,
+    xyzInt: bool = True,
 ):
     """
     Generates the Gaussian input file for excited state optimization calculations.
@@ -419,6 +452,7 @@ def generate_excited_state_optimization_files(
         route_section,
         title,
         header_options,
+        xyzInt=xyzInt,
     )
 
 
@@ -437,6 +471,7 @@ def generate_excited_state_frequency_files(
     basis: str = "6-31g*",
     nstates: int = 6,
     root: int = 1,
+    xyzInt: bool = True,
 ):
     """
     Generates the Gaussian input file for excited state frequency calculations.
@@ -463,6 +498,7 @@ def generate_excited_state_frequency_files(
         route_section,
         title,
         header_options,
+        xyzInt=xyzInt,
     )
 
 
@@ -483,6 +519,7 @@ def generate_charge_files(
     excited_state: bool = False,
     nstates: int = 6,
     root: int = 1,
+    xyzInt: bool = True,
 ):
     """
     Generates the Gaussian input file for charge calculations.
@@ -527,6 +564,7 @@ def generate_charge_files(
         route_section,
         title,
         header_options,
+        xyzInt=xyzInt,
     )
 
 
@@ -546,6 +584,7 @@ def generate_transition_charge_files(
     method: str = "SaveNTO",
     nstates: int = 6,
     root: int = 1,
+    xyzInt: bool = True,
 ):
     """
     Generates the Gaussian input file for charge calculations.
@@ -580,6 +619,7 @@ def generate_transition_charge_files(
         route_section,
         title,
         header_options,
+        xyzInt=xyzInt,
     )
 
 
@@ -593,6 +633,7 @@ def generate_diabatization_inputs(
     solvent_charge_list,
     net_charge,
     spin_mult,
+    xyzInt: bool = True,
 ):
     """
     Generates the Gaussian input files required for diabatization calculations.
@@ -618,16 +659,26 @@ def generate_diabatization_inputs(
         # Write all dyes
         for dye_labels, dye_coords in zip(dye_atom_labels_list, dye_coords_list):
             for label, coord in zip(dye_labels, dye_coords):
-                gauss_file.write(
-                    f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
-                )
+                if xyzInt:
+                    gauss_file.write(
+                        f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                    )
+                else:
+                    gauss_file.write(
+                        f"{label}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                    )
 
         for mol_idx in qm_solvent_indices:
             mol_labels, mol_coords = solvent_molecules[mol_idx]
             for label, coord in zip(mol_labels, mol_coords):
-                gauss_file.write(
-                    f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
-                )
+                if xyzInt:
+                    gauss_file.write(
+                        f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                    )
+                else:
+                    gauss_file.write(
+                        f"{label}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                    )
 
         gauss_file.write("\n")
 
@@ -652,16 +703,26 @@ def generate_diabatization_inputs(
         dye_labels = dye_atom_labels_list[0]
         dye_coords = dye_coords_list[0]
         for label, coord in zip(dye_labels, dye_coords):
-            gauss_file.write(
-                f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
-            )
+            if xyzInt:
+                gauss_file.write(
+                    f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                )
+            else:
+                gauss_file.write(
+                    f"{label}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                )
 
         for mol_idx in qm_solvent_indices:
             mol_labels, mol_coords = solvent_molecules[mol_idx]
             for label, coord in zip(mol_labels, mol_coords):
-                gauss_file.write(
-                    f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
-                )
+                if xyzInt:
+                    gauss_file.write(
+                        f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                    )
+                else:
+                    gauss_file.write(
+                        f"{label}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                    )
 
         gauss_file.write("\n")
 
@@ -690,16 +751,26 @@ def generate_diabatization_inputs(
             dye_labels = dye_atom_labels_list[1]
             dye_coords = dye_coords_list[1]
             for label, coord in zip(dye_labels, dye_coords):
-                gauss_file.write(
-                    f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
-                )
+                if xyzInt:
+                    gauss_file.write(
+                        f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                    )
+                else:
+                    gauss_file.write(
+                        f"{label}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                    )
 
             for mol_idx in qm_solvent_indices:
                 mol_labels, mol_coords = solvent_molecules[mol_idx]
                 for label, coord in zip(mol_labels, mol_coords):
-                    gauss_file.write(
-                        f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
-                    )
+                    if xyzInt:
+                        gauss_file.write(
+                            f"{remove_integers_from_symbol(label)}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                        )
+                    else:
+                        gauss_file.write(
+                            f"{label}\t{coord[0]:.6f}\t{coord[1]:.6f}\t{coord[2]:.6f}\n"
+                        )
 
             gauss_file.write("\n")
 
