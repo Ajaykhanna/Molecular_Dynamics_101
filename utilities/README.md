@@ -25,7 +25,7 @@
 - [Installation](#installation)
 - [Usage](#usage)
   - [Command-Line Arguments](#command-line-arguments)
-  - [Examples](#examples)
+  - [Example](#example)
 - [Input File Formats](#input-file-formats)
   - [Trajectory File](#trajectory-file)
   - [Solvent Charge File](#solvent-charge-file)
@@ -91,20 +91,28 @@ The script is executed via the command line and requires several arguments to fu
 - `--gaussian_inputs` (-gau_inputs): **(Optional)** Generate Gaussian input files for various QM calculations.
 -`--teracheem_inputs` (-tera_inputs): **(Optional)** Generate TeraChem input files for various QM calculations.`
 
-### Examples
+### Example
 
-#### Basic Usage
+#### With one dye/ligand/molecule/choromophore
 
 ```bash
-python md_to_qmmm_input.py --input trajectory.xyz --solv_charge solv_charge.txt \
+python md_to_qmmm_input.py --input twoframes_example.xyz --solv_charge solv_charge.txt \
+--qm_radius 5 --nDyes 1 --dye_atoms 17 --total_nDyes_atoms 17 \
+--nAtoms_solvent 10 --total_frames 10 --total_atoms 4489
+```
+
+#### With two or more dye/ligand/molecule/choromophore
+
+```bash
+python md_to_qmmm_input.py --input twoframes_example.xyz --solv_charge solv_charge.txt \
 --qm_radius 5 --nDyes 2 --dye_atoms 17 42 --total_nDyes_atoms 59 \
---nAtoms_solvent 3 --total_frames 10 --total_atoms 1000
+--nAtoms_solvent 10 --total_frames 10 --total_atoms 4489
 ```
 
 #### Defining a Custom MM Radius
 
 ```bash
-python md_to_qmmm_input.py --input trajectory.xyz --solv_charge solv_charge.txt \
+python md_to_qmmm_input.py --input twoframes_example.xyz --solv_charge solv_charge.txt \
 --qm_radius 5 --mm_radius 10 --nDyes 2 --dye_atoms 17 42 \
 --total_nDyes_atoms 59 --nAtoms_solvent 3 --total_frames 10 \
 --total_atoms 1000
@@ -113,7 +121,7 @@ python md_to_qmmm_input.py --input trajectory.xyz --solv_charge solv_charge.txt 
 #### Converting a Dye to MM Charges
 
 ```bash
-python md_to_qmmm_input.py --input trajectory.xyz --solv_charge solv_charge.txt \
+python md_to_qmmm_input.py --input twoframes_example.xyz --solv_charge solv_charge.txt \
 --qm_radius 5 --nDyes 2 --dye_atoms 17 42 --total_nDyes_atoms 59 \
 --nAtoms_solvent 3 --total_frames 10 --total_atoms 4489 \
 --dye_MM_charges 1:first_dye_MM_charge.txt --net_charge 0 --spin_mult 1
@@ -122,7 +130,7 @@ python md_to_qmmm_input.py --input trajectory.xyz --solv_charge solv_charge.txt 
 #### Generating Diabatization Input Files
 
 ```bash
-python md_to_qmmm_input.py --input trajectory.xyz --solv_charge solv_charge.txt \
+python md_to_qmmm_input.py --input twoframes_example.xyz --solv_charge solv_charge.txt \
 --qm_radius 5 --nDyes 2 --dye_atoms 17 42 --total_nDyes_atoms 59 \
 --nAtoms_solvent 3 --total_frames 10 --total_atoms 4489 --net_charge 0 --spin_mult 1\
 --gaussian_inputs
@@ -296,33 +304,4 @@ For any questions or issues, please open an issue on GitHub or contact me via em
 - The script is provided "as-is" without warranty of any kind.
 
 ---
-
-# **Quick Start Guide**
-
-1. **Prepare Your Input Files**:
-
-   - Ensure your trajectory file is correctly formatted.
-   - Create a solvent charge file with appropriate charges.
-   - (Optional) Prepare dye MM charge files if you plan to convert dyes to MM charges.
-
-2. **Run the Script**:
-
-   ```bash
-   python md_to_qmmm_input.py --input trajectory.xyz --solv_charge solv_charge.txt \
-   --qm_radius 5 --nDyes 2 --dye_atoms 17 42 --total_nDyes_atoms 59 \
-   --nAtoms_solvent 10 --total_frames 10 --total_atoms 4489
-   ```
-
-3. **Check the Output**:
-
-   - Navigate to the directories created for each frame.
-   - Verify that the output files are correctly generated.
-
-4. **Use the Output Files**:
-
-   - Use the TeraChem and Gaussian input files for your simulations.
-   - Refer to the software documentation for instructions on running simulations with these files.
-
----
-
 **Happy QM/MM!**
