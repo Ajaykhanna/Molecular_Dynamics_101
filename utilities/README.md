@@ -97,9 +97,9 @@ The script is executed via the command line and requires several arguments to fu
 #### With one dye/ligand/molecule/choromophore
 
 ```bash
-python md_to_qmmm_input.py --input twoframes_example.xyz --solv_charge solv_charge.txt \
+python md_to_qmmm_input.py --input oneDye_traj_example.xyz --solv_charge solv_charge.txt \
 --qm_radius 5 --nDyes 1 --dye_atoms 17 --total_nDyes_atoms 17 \
---nAtoms_solvent 10 --total_frames 10 --total_atoms 4489
+--nAtoms_solvent 10 --total_frames 5 --total_atoms 10077
 ```
 
 #### With two or more dye/ligand/molecule/choromophore
@@ -169,12 +169,20 @@ O1    1.234567    2.345678    3.456789
 - **Content**: Charge values corresponding to each atom in a single solvent molecule.
 - **Format**: One charge value per line.
 
-**Example** (for a solvent molecule with 3 atoms):
+**Example** (for a DMSO solvent molecule with 10 atoms):
+S O C C H H H H H H
 
-```
-0.423
--0.846
-0.423
+```txt
+ 0.2685
+-0.5063
+-0.1309
+-0.1309
+ 0.0886
+ 0.0866
+ 0.0746
+ 0.0866
+ 0.0746
+ 0.0886
 ```
 
 ### Dye MM Charge Files
