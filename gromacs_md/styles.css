@@ -1,0 +1,55 @@
+/* Optional: Custom base styles or overrides */
+body {
+    font-family: sans-serif; /* Example override */
+}
+
+/* Simple style for code blocks to hint at language */
+/* Uses data-lang attribute set in HTML */
+pre[data-lang="bash"]::before,
+pre[data-lang="ini"]::before {
+    display: block;
+    text-align: right;
+    font-size: 0.8em;
+    color: #9ca3af; /* gray-400 */
+    margin-bottom: -1.5em; /* Pulls it up slightly */
+    margin-right: 1em;
+    font-style: italic;
+    position: relative; /* Helps with positioning if needed */
+    z-index: 1; /* Ensures it's above the background */
+}
+
+pre[data-lang="bash"]::before {
+    content: "bash";
+}
+
+pre[data-lang="ini"]::before {
+    content: "mdp";
+}
+
+
+/* Style for clickable headers */
+.toggle-header {
+    cursor: pointer;
+    user-select: none; /* Prevent text selection on double click */
+    position: relative; /* Needed for absolute positioning of pseudo-element */
+    padding-right: 1.5em; /* Make space for the arrow */
+}
+
+/* Arrow indicator for collapsible sections */
+.toggle-header::after {
+    content: '▼'; /* Down arrow indicates expandable */
+    font-size: 0.8em;
+    display: inline-block;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%); /* Vertically center */
+    transition: transform 0.2s ease-in-out; /* Smooth transition for rotation */
+}
+
+.toggle-header.collapsed::after {
+    content: '▶'; /* Right arrow indicates collapsed */
+    /* transform: translateY(-50%) rotate(-90deg); */ /* Alternative: rotate down arrow */
+}
+
+/* Add any other custom CSS rules here */
